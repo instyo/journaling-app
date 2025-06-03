@@ -131,6 +131,7 @@ class NotificationService {
   }
 }
 
+@pragma('vm:entry-point')
 void onDidReceiveLocalNotification(
   int id,
   String? title,
