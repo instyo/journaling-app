@@ -33,7 +33,8 @@ class JournalCubit extends Cubit<JournalState> {
               state.copyWith(journals: journals, status: StateStatus.success),
             );
           },
-          onError: (e) {
+          onError: (e, s) {
+            print(">> $e, $s");
             emit(
               state.copyWith(
                 errorMessage: e.toString(),

@@ -1,24 +1,26 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:journaling/common/widgets/custom_chip.dart';
 import 'package:journaling/common/widgets/custom_scaffold.dart';
 import 'package:journaling/common/widgets/markdown_input_v2.dart';
 import 'package:journaling/core/utils/context_extension.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/core/utils/state_status_enum.dart';
 import 'package:journaling/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:journaling/features/journal/cubit/journal_cubit.dart';
-import 'package:journaling/features/journal/models/emoji_emotion.dart';
 import 'package:journaling/features/journal/models/journal_entry.dart';
 
 class JournalWriteScreenV2 extends StatelessWidget {
-  final EmojiEmotion item;
-  final List<String> emotions;
+  final MoodEnum item;
+  final List<String> feelings;
   final JournalEntry? entry;
 
   const JournalWriteScreenV2({
     super.key,
     required this.item,
-    required this.emotions,
+    required this.feelings,
     this.entry,
   });
 
@@ -26,8 +28,8 @@ class JournalWriteScreenV2 extends StatelessWidget {
 
   static void open(
     BuildContext context, {
-    required EmojiEmotion item,
-    required List<String> emotions,
+    required MoodEnum item,
+    required List<String> feelings,
     JournalEntry? entry,
   }) {
     Navigator.of(context).pushReplacement(
@@ -35,7 +37,7 @@ class JournalWriteScreenV2 extends StatelessWidget {
         builder:
             (context) => JournalWriteScreenV2(
               item: item, // Assuming a default emoji is available
-              emotions: emotions, // Provide a default or empty list of emotions
+              feelings: feelings, // Provide a default or empty list of emotions
               entry: entry,
             ),
       ),
@@ -76,7 +78,7 @@ class JournalWriteScreenV2 extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         for (final feeling
-                            in (isEdit ? entry!.emotions : emotions))
+                            in (isEdit ? entry!.feelings : feelings))
                           CustomChip(text: feeling, isSelected: true),
                       ],
                     ),
@@ -92,7 +94,7 @@ class JournalWriteScreenV2 extends StatelessWidget {
                       CustomChip(
                         text:
                             isEdit
-                                ? '${entry?.mood} ${entry?.label}'
+                                ? '${entry?.mood.emoji} ${entry?.mood.label}'
                                 : '${item.emoji} ${item.label}',
                         isSelected: true,
                       ),
@@ -116,18 +118,17 @@ class JournalWriteScreenV2 extends StatelessWidget {
                               title:
                                   'Journal ${DateTime.now().toIso8601String()}',
                               content: textController.text,
-                              mood: item.emoji,
-                              label: item.label,
                               createdAt: DateTime.now(),
+                              feelings: feelings,
+                              mood: item,
                             );
 
                             await cubit.createJournal(journal);
                           }
 
-                          final jCubit = context.read<JournalCubit>();
-
-                          jCubit.changeDate(DateTime.now());
-
+                          // Refresh and navigate
+                          final journalCubit = context.read<JournalCubit>();
+                          journalCubit.changeDate(DateTime.now());
                           DashboardScreen.open(context);
                         },
                         label: Text("Submit"),

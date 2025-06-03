@@ -1,14 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:journaling/features/journal/models/emoji_emotion.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 
 class JournalEntry {
   final String? id;
   final String userId;
   final String title;
   final String content; // Markdown text
-  final String mood; // Keep the string mood
-  final String label;
-  final List<String> emotions; // URLs from Firebase Storage
+  final MoodEnum mood;
+  final List<String> feelings; // URLs from Firebase Storage
   final DateTime createdAt;
 
   JournalEntry({
@@ -17,8 +16,7 @@ class JournalEntry {
     required this.title,
     required this.content,
     required this.mood,
-    required this.label,
-    this.emotions = const [],
+    this.feelings = const [],
     required this.createdAt,
   });
 
@@ -28,12 +26,14 @@ class JournalEntry {
       userId: map['userId'] ?? '',
       title: map['title'] ?? '',
       content: map['content'] ?? '',
-      mood: map['mood'] ?? '',
-      label: map['label'] ?? '',
-      emotions:
-          map['emotions'] == null
+      mood:
+          map['mood'] == null
+              ? MoodEnum.great
+              : MoodEnum.values.firstWhere((e) => e.value == map['mood']),
+      feelings:
+          map['feelings'] == null
               ? []
-              : List<String>.from(map['emotions'] ?? []),
+              : List<String>.from(map['feelings'] ?? []),
       createdAt:
           map['createdAt'] == null
               ? DateTime.now()
@@ -46,9 +46,8 @@ class JournalEntry {
       'userId': userId,
       'title': title,
       'content': content,
-      'mood': mood,
-      'label': label,
-      'emotions': emotions,
+      'mood': mood.value,
+      'feelings': feelings,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -59,9 +58,8 @@ class JournalEntry {
     String? userId,
     String? title,
     String? content,
-    String? mood,
-    String? label,
-    List<String>? emotions,
+    MoodEnum? mood,
+    List<String>? feelings,
     DateTime? createdAt,
   }) {
     return JournalEntry(
@@ -70,17 +68,16 @@ class JournalEntry {
       title: title ?? this.title,
       content: content ?? this.content,
       mood: mood ?? this.mood,
-      label: label ?? this.label,
-      emotions: emotions ?? this.emotions,
+      feelings: feelings ?? this.feelings,
       createdAt: createdAt ?? this.createdAt,
     );
   }
 
-  (DateTime, int) get moodLevel => (
-    createdAt,
-    kEmotionList.indexWhere((e) => e.emoji == mood) + 1,
-  );
+  // (DateTime, int) get moodLevel => (
+  //   createdAt,
+  //   kEmotionList.indexWhere((e) => e.emoji == mood) + 1,
+  // );
 
-  double get moodChartValue =>
-      (kEmotionList.indexWhere((e) => e.emoji == mood) + 1);
+  // double get moodChartValue =>
+  //     (kEmotionList.indexWhere((e) => e.emoji == mood) + 1);
 }

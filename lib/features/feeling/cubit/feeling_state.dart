@@ -1,12 +1,12 @@
 // lib/feeling_cubit.dart
-import 'package:journaling/features/journal/models/emoji_emotion.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 
 class FeelingState {
-  final EmojiEmotion selected;
-  final List<String> selectedEmotions;
+  final MoodEnum selected;
+  final List<String> selectedFeelings;
 
   FeelingState({
     required this.selected,
-    required this.selectedEmotions,
+    required this.selectedFeelings,
   });
 }

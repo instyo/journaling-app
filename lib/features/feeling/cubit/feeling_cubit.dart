@@ -1,37 +1,23 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/features/feeling/cubit/feeling_state.dart';
-import 'package:journaling/features/journal/models/emoji_emotion.dart';
 
 class FeelingCubit extends Cubit<FeelingState> {
   FeelingCubit()
-    : super(
-        FeelingState(
-          selected: kEmotionList.last,
-          selectedEmotions: [],
-        ),
-      );
+    : super(FeelingState(selected: MoodEnum.values.last, selectedFeelings: []));
 
-  void selectEmotion(EmojiEmotion emotion) {
-    emit(
-      FeelingState(
-        selected: emotion,
-        selectedEmotions: [],
-      ),
-    );
+  void selectMood(MoodEnum mood) {
+    emit(FeelingState(selected: mood, selectedFeelings: []));
   }
 
-  void toggleEmotion(String emotion) {
-    final newEmotions = List<String>.from(state.selectedEmotions);
-    if (newEmotions.contains(emotion)) {
-      newEmotions.remove(emotion);
+  void toggleFeeling(String feeling) {
+    final newFeelings = List<String>.from(state.selectedFeelings);
+
+    if (newFeelings.contains(feeling)) {
+      newFeelings.remove(feeling);
     } else {
-      newEmotions.add(emotion);
+      newFeelings.add(feeling);
     }
-    emit(
-      FeelingState(
-        selected: state.selected,
-        selectedEmotions: newEmotions,
-      ),
-    );
+    emit(FeelingState(selected: state.selected, selectedFeelings: newFeelings));
   }
 }

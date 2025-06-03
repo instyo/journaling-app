@@ -26,7 +26,6 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
             TabBar(
-              labelPadding: EdgeInsets.only(bottom: 42),
               tabs: [
                 Tab(icon: Icon(Icons.home)),
                 Tab(icon: Icon(Icons.stacked_bar_chart)),

@@ -2,6 +2,7 @@ import 'dart:async'; // Import for StreamSubscription
 import 'dart:math';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/core/utils/state_status_enum.dart';
 import 'package:journaling/features/journal/data/journal_repository.dart';
 import 'package:journaling/features/journal/models/emoji_emotion.dart';
@@ -17,34 +18,27 @@ class StatsCubit extends Cubit<StatsState> {
   Stream<int> get totalJournal$ =>
       stream.map((state) => state.journals.length).distinct();
 
-  Stream<EmojiEmotion> get commonMood$ {
+  Stream<MoodEnum> get commonMood$ {
+    final moodCount = <MoodEnum, int>{};
+    final today = DateTime.now();
+
     return stream.map((state) {
-      if (state.journals.isEmpty) {
-        return const EmojiEmotion(emoji: '', label: '', emotion: []);
-      }
-      final moodCount = <String, int>{};
-
       for (var journal in state.journals) {
-        final mood = journal.mood; // Assuming JournalEntry has a mood property
+        final date = DateTime(
+          journal.createdAt.year,
+          journal.createdAt.month,
+          journal.createdAt.day,
+        );
 
-        moodCount[mood] = (moodCount[mood] ?? 0) + 1;
+        if (date.isAfter(today.subtract(Duration(days: 7))) &&
+            date.isBefore(today.add(Duration(days: 1)))) {
+          moodCount[journal.mood] = (moodCount[journal.mood] ?? 0) + 1;
+        }
       }
 
-      // Check if moodCount is empty before trying to find the max
-      if (moodCount.isEmpty) {
-        return const EmojiEmotion(emoji: '', label: '', emotion: []);
-      }
-
-      // Find the mood with the highest count
-      final commonMoodKey =
-          moodCount.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
-
-      // Find the corresponding EmojiEmotion
-      final commonMood = kEmotionList.firstWhere(
-        (emotion) => emotion.emoji == commonMoodKey,
-        orElse: () => const EmojiEmotion(emoji: '', label: '', emotion: []),
-      );
-
+      // Find the most common mood
+      final commonMood =
+          moodCount.entries.reduce((a, b) => a.value > b.value ? a : b).key;
       return commonMood;
     }).distinct();
   }
@@ -54,7 +48,7 @@ class StatsCubit extends Cubit<StatsState> {
       final emotionCount = <String, int>{};
 
       for (var journal in state.journals) {
-        for (var emotion in journal.emotions) {
+        for (var emotion in journal.feelings) {
           // Iterate through the list of emotions
           emotionCount[emotion] = (emotionCount[emotion] ?? 0) + 1;
         }
@@ -70,8 +64,8 @@ class StatsCubit extends Cubit<StatsState> {
     }).distinct();
   }
 
-  Stream<List<(DateTime, int)>> get averageMoodsIn7Days$ {
-    final moodCount = <DateTime, List<int>>{};
+  Stream<List<(DateTime, MoodEnum)>> get averageMoodsIn7Days$ {
+    final moodCount = <DateTime, List<MoodEnum>>{};
     final today = DateTime.now();
 
     return stream.map((stateX) {
@@ -88,12 +82,7 @@ class StatsCubit extends Cubit<StatsState> {
             moodCount[date] = [];
           }
 
-          final moodIndex = kEmotionList.indexWhere(
-            (emotion) => emotion.emoji == journal.mood,
-          );
-          if (moodIndex != -1) {
-            moodCount[date]!.add(moodIndex + 1); // +1 to match the 1-5 scale
-          }
+          moodCount[date]!.add(journal.mood); // Store MoodEnum directly
         }
       }
 
@@ -104,10 +93,10 @@ class StatsCubit extends Cubit<StatsState> {
         // Calculate the average mood as an integer
         final averageMood =
             totalMoods > 0
-                ? (entry.value.reduce((a, b) => a + b) / totalMoods).round()
+                ? (entry.value.map((mood) => mood.value).reduce((a, b) => a + b) / totalMoods).round()
                 : 0; // Default to 0 if no moods
 
-        return (date, averageMood);
+        return (date, MoodEnum.values[averageMood - 1]); // Convert back to MoodEnum
       }).toList();
     });
   }
@@ -151,10 +140,11 @@ class StatsCubit extends Cubit<StatsState> {
             title: 'Journal ${DateTime.now().toIso8601String()}',
             content:
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            mood: randomData.emoji,
-            label: randomData.label,
-            emotions: (randomData.emotion.toList()..shuffle()).sublist(0, 4),
-            createdAt: date.subtract(Duration(hours: Random().nextInt(9))),
+            // mood: randomData.emoji,
+            // label: randomData.label,
+            feelings: (randomData.feelings.toList()..shuffle()).sublist(0, 6),
+            createdAt: date.subtract(Duration(hours: Random().nextInt(9) + 1)),
+            mood: MoodEnum.values[Random().nextInt(5) + 1],
           ),
         );
       }

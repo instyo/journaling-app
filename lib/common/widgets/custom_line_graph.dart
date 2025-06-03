@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
+import 'package:journaling/core/utils/mood_enum.dart';
+
+typedef GraphData = (DateTime, MoodEnum);
 
 class CustomLineGraph extends StatefulWidget {
-  final List<(DateTime, int)> data;
+  final List<GraphData> data;
   final Color lineColor;
   final Color pointColor;
-  final String Function(double value)? formatYLabel;
-  final String Function(DateTime time, int value)? formatPointLabel;
-  final String Function(DateTime time, int value)? formatTooltipLabel;
+  final String Function(MoodEnum value)? formatYLabel;
+  final String Function(GraphData)? formatPointLabel;
+  final String Function(GraphData)? formatTooltipLabel;
   final String Function(DateTime time)? formatXLabel;
 
   const CustomLineGraph({
@@ -82,10 +85,10 @@ class _CustomLineGraphState extends State<CustomLineGraph> {
                 top: tappedPosition!.dy - 30,
                 child: _TooltipBubble(
                   text:
-                      widget.formatTooltipLabel?.call(
+                      widget.formatTooltipLabel?.call((
                         widget.data[tappedIndex!].$1,
                         widget.data[tappedIndex!].$2,
-                      ) ??
+                      )) ??
                       '${widget.data[tappedIndex!].$2}',
                 ),
               ),
@@ -118,12 +121,12 @@ class _TooltipBubble extends StatelessWidget {
 }
 
 class _LineGraphPainter extends CustomPainter {
-  final List<(DateTime, int)> data;
+  final List<GraphData> data;
   final Color lineColor;
   final Color pointColor;
-  final String Function(double value)? formatYLabel;
+  final String Function(MoodEnum value)? formatYLabel;
   final String Function(DateTime time)? formatXLabel;
-  final String Function(DateTime time, int value)? formatPointLabel;
+  final String Function(GraphData value)? formatPointLabel;
   final void Function(List<Offset>)? onPointsCalculated;
 
   _LineGraphPainter(
@@ -155,7 +158,7 @@ class _LineGraphPainter extends CustomPainter {
 
     final sortedData = [...data]..sort((a, b) => a.$1.compareTo(b.$1));
     final times = sortedData.map((e) => e.$1).toList();
-    final values = sortedData.map((e) => e.$2).toList();
+    // final values = sortedData.map((e) => e.$2).toList();
 
     // Handle edge cases for Y values
     final minY = 0.0;
@@ -184,7 +187,7 @@ class _LineGraphPainter extends CustomPainter {
           leftPadding;
       final yPos =
           chartHeight -
-          ((sortedData[i].$2 - minY) / yRange) * chartHeight +
+          ((sortedData[i].$2.value - minY) / yRange) * chartHeight +
           bottomPadding;
 
       if (xPos.isFinite && yPos.isFinite) {
@@ -305,7 +308,7 @@ class _LineGraphPainter extends CustomPainter {
       canvas.drawCircle(point, 4, pointPaint);
 
       // Draw point label
-      final label = formatPointLabel?.call(time, value) ?? value.toString();
+      final label = formatPointLabel?.call(sortedData[i]) ?? value.toString();
       final textSpan = TextSpan(text: label, style: pointTextStyle);
       final textPainter = TextPainter(
         text: textSpan,

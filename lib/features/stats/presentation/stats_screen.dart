@@ -5,6 +5,7 @@ import 'package:journaling/common/widgets/custom_line_graph.dart';
 import 'package:journaling/common/widgets/custom_scaffold.dart';
 import 'package:journaling/common/widgets/mood_card.dart';
 import 'package:journaling/core/utils/context_extension.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/features/stats/cubit/stats_cubit.dart';
 import 'package:pie_chart/pie_chart.dart';
 
@@ -21,23 +22,6 @@ class _StatsScreenState extends State<StatsScreen> {
     super.initState();
     // Load stats when the screen initializes
     context.read<StatsCubit>().getJournals();
-  }
-
-  String _getLabel(int value) {
-    switch (value) {
-      case 1:
-        return 'Bad';
-      case 2:
-        return 'Meh';
-      case 3:
-        return 'Okay';
-      case 4:
-        return 'Good';
-      case 5:
-        return 'Great';
-      default:
-        return '';
-    }
   }
 
   @override
@@ -68,13 +52,13 @@ class _StatsScreenState extends State<StatsScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  StreamBuilder(
+                  StreamBuilder<MoodEnum>(
+                    initialData: MoodEnum.unknown,
                     stream: cubit.commonMood$,
                     builder: (context, snapshot) {
                       return MoodCard(
                         title: "Common Mood",
-                        value:
-                            "${snapshot.data?.emoji} (${snapshot.data?.label})",
+                        value: "${snapshot.data?.moodLabel}",
                       );
                     },
                   ),
@@ -92,13 +76,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  MoodCard(title: "Common Feeling", value: ""),
-                  const SizedBox(width: 8),
-                  MoodCard(title: "Common Mood", value: ""),
-                ],
-              ),
+
               const SizedBox(height: 8),
               Text(
                 "Average Mood Levels: ",
@@ -108,7 +86,7 @@ class _StatsScreenState extends State<StatsScreen> {
               ),
               Padding(
                 padding: EdgeInsets.only(top: 32),
-                child: StreamBuilder<List<(DateTime, int)>>(
+                child: StreamBuilder<List<GraphData>>(
                   stream: cubit.averageMoodsIn7Days$,
                   initialData: [],
                   builder: (context, snapshot) {
@@ -120,15 +98,14 @@ class _StatsScreenState extends State<StatsScreen> {
                       data: snapshot.data!,
                       lineColor: context.primaryColor,
                       pointColor: Colors.orange,
-                      formatTooltipLabel: (time, value) {
-                        return DateFormat('dd/MM/yyyy').format(time);
+                      formatTooltipLabel: (data) {
+                        return DateFormat('dd/MM/yyyy').format(data.$1);
                       },
-                      formatPointLabel: (d, i) {
-                        // return _getEmoji(i);
-                        return "";
+                      formatPointLabel: (data) {
+                        return data.$2.emoji;
                       },
-                      formatYLabel: (val) {
-                        return _getLabel(val.toInt());
+                      formatYLabel: (data) {
+                        return data.label;
                       },
                       formatXLabel: (time) {
                         return DateFormat('dd LLL').format(time);

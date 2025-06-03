@@ -7,11 +7,11 @@ import 'package:journaling/common/widgets/custom_scaffold.dart';
 import 'package:journaling/common/widgets/mood_card.dart';
 import 'package:journaling/common/widgets/stripped_calendar.dart';
 import 'package:journaling/core/utils/context_extension.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/core/utils/state_status_enum.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/journal/cubit/journal_cubit.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
-import 'package:journaling/features/journal/models/emoji_emotion.dart';
 import 'package:journaling/features/journal/models/journal_entry.dart';
 
 class JournalListScreen extends StatelessWidget {
@@ -51,27 +51,6 @@ class JournalListScreen extends StatelessWidget {
         onPressed: () => context.read<AuthCubit>().signOut(),
       ),
     ];
-  }
-
-  // String _getEmoji(int value) {
-  //   return rawEmojiEmotions[value - 1]['emoji'] ?? '❤️';
-  // }
-
-  String _getLabel(int value) {
-    switch (value) {
-      case 1:
-        return 'Bad';
-      case 2:
-        return 'Meh';
-      case 3:
-        return 'Okay';
-      case 4:
-        return 'Good';
-      case 5:
-        return 'Great';
-      default:
-        return '';
-    }
   }
 
   Widget _buildJournalContent(BuildContext context) {
@@ -139,19 +118,18 @@ class JournalListScreen extends StatelessWidget {
                                 CustomLineGraph(
                                   data:
                                       sortedData
-                                          .map((e) => e.moodLevel)
+                                          .map((e) => (e.createdAt, e.mood))
                                           .toList(),
                                   lineColor: context.primaryColor,
                                   pointColor: Colors.orange,
-                                  formatTooltipLabel: (time, value) {
-                                    return DateFormat.Hm().format(time);
+                                  formatTooltipLabel: (data) {
+                                    return DateFormat.Hm().format(data.$1);
                                   },
-                                  formatPointLabel: (d, i) {
-                                    // return _getEmoji(i);
+                                  formatPointLabel: (data) {
                                     return "";
                                   },
-                                  formatYLabel: (val) {
-                                    return _getLabel(val.toInt());
+                                  formatYLabel: (data) {
+                                    return data.label;
                                   },
                                 ),
 
@@ -168,42 +146,31 @@ class JournalListScreen extends StatelessWidget {
     );
   }
 
-  String _calculateMostCommonMood(List<JournalEntry> journals) {
-    final moodValues = <String, int>{};
-
-    // Populate moodValues with the corresponding index from kEmotionList
-    for (var i = 0; i < kEmotionList.length; i++) {
-      moodValues[kEmotionList[i].emoji] = i + 1; // Use emoji as key
+  MoodEnum _calculateMostCommonMood(List<JournalEntry> journals) {
+    if (journals.isEmpty) {
+      return MoodEnum.unknown; // Default mood if no journals are present
     }
 
-    int totalMoodValue = 0;
-    int count = 0;
-
-    print("Journals: $journals"); // Debugging line
+    final moodCount = <String, int>{};
 
     for (var journal in journals) {
-      print("Checking mood: ${journal.mood}"); // Debugging line
-      if (moodValues.containsKey(journal.mood)) {
-        totalMoodValue += moodValues[journal.mood]!;
-        count++;
-      }
+      final mood = journal.mood.label;
+      moodCount[mood] = (moodCount[mood] ?? 0) + 1;
     }
 
-    if (count == 0) return "No mood data"; // Handle case with no journals
+    // Find the mood with the highest count
+    final mostCommonMoodKey =
+        moodCount.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
 
-    final averageMoodValue = (totalMoodValue / count).round();
-
-    // Get the emoji and label for the average mood
-    final emoji = kEmotionList[averageMoodValue - 1].emoji;
-    final label = kEmotionList[averageMoodValue - 1].label;
-
-    // Return the formatted string
-    return "$emoji ($label)"; // Return the emoji and label in the desired format
+    // Return the corresponding MoodEnum
+    return MoodEnum.values.firstWhere(
+      (mood) => mood.label == mostCommonMoodKey,
+    );
   }
 
   Widget _buildSummarySection(
     BuildContext context,
-    String mostCommonMood,
+    MoodEnum mood,
     int totalJournals,
   ) {
     return Column(
@@ -219,7 +186,7 @@ class JournalListScreen extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            MoodCard(title: "Common Mood", value: mostCommonMood),
+            MoodCard(title: "Common Mood", value: mood.moodLabel),
             const SizedBox(width: 16), // Space between the boxes
             MoodCard(title: "Total Journals", value: "$totalJournals"),
           ],
@@ -254,7 +221,7 @@ class JournalListScreen extends StatelessWidget {
               title: journal.title,
               descriptions: journal.content,
               text: 'Close',
-              emoji: journal.mood,
+              emoji: journal.mood.emoji,
               onDelete: () {
                 Navigator.pop(context);
                 context.read<JournalCubit>().deleteJournal(journal.id!);
@@ -299,7 +266,7 @@ class JournalListScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                journal.mood,
+                journal.mood.emoji,
                 style: context.textTheme.headlineMedium,
               ),
             ),

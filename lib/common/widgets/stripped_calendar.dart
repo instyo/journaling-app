@@ -58,7 +58,7 @@ class _CalendarStripState extends State<CalendarStrip>
   Widget build(BuildContext context) {
     super.build(context);
     return SizedBox(
-      height: 60,
+      height: 80,
       child: ListView.builder(
         // shrinkWrap: true,
         key: PageStorageKey(

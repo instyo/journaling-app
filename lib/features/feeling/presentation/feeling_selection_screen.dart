@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:journaling/core/utils/context_extension.dart';
+import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:journaling/features/feeling/cubit/feeling_cubit.dart';
 import 'package:journaling/features/feeling/cubit/feeling_state.dart';
@@ -62,54 +63,55 @@ class FeelingSelectionScreen extends StatelessWidget {
                     const SizedBox(height: 20.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(kEmotionList.length, (index) {
-                        final isSelected =
-                            kEmotionList[index] == state.selected;
-                        return GestureDetector(
-                          onTap: () {
-                            context.read<FeelingCubit>().selectEmotion(
-                              kEmotionList[index],
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              color:
-                                  isSelected ? Colors.white : Colors.grey[100],
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(
-                                color:
-                                    isSelected
-                                        ? context.primaryColor
-                                        : Colors.grey[200]!,
-                                width: isSelected ? 2.0 : 1.0,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  kEmotionList[index].emoji,
-                                  style: const TextStyle(fontSize: 36),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  kEmotionList[index].label,
-                                  style: context.textTheme.bodyLarge?.copyWith(
+                      children:
+                          MoodEnum.values.sublist(1, 6).map((item) {
+                            final bool isSelected = item == state.selected;
+                            return GestureDetector(
+                              onTap: () {
+                                context.read<FeelingCubit>().selectMood(item);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color:
+                                      isSelected
+                                          ? Colors.white
+                                          : Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  border: Border.all(
                                     color:
                                         isSelected
-                                            ? const Color(0xFF4C873D)
-                                            : Colors.grey[700],
-                                    fontWeight:
-                                        isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                            ? context.primaryColor
+                                            : Colors.grey[200]!,
+                                    width: isSelected ? 2.0 : 1.0,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      item.emoji,
+                                      style: const TextStyle(fontSize: 36),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      item.label,
+                                      style: context.textTheme.bodyLarge
+                                          ?.copyWith(
+                                            color:
+                                                isSelected
+                                                    ? const Color(0xFF4C873D)
+                                                    : Colors.grey[700],
+                                            fontWeight:
+                                                isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.normal,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
                     ),
                     const SizedBox(height: 32.0),
                     Text(
@@ -123,14 +125,14 @@ class FeelingSelectionScreen extends StatelessWidget {
                       spacing: 8.0,
                       runSpacing: 8.0,
                       children:
-                          state.selected.emotion.map((emotion) {
-                            final isSelected = state.selectedEmotions.contains(
-                              emotion,
-                            );
+                          state.selected.feelings.map((feeling) {
+                            final bool isSelected = state.selectedFeelings
+                                .contains(feeling);
+
                             return GestureDetector(
                               onTap: () {
-                                context.read<FeelingCubit>().toggleEmotion(
-                                  emotion,
+                                context.read<FeelingCubit>().toggleFeeling(
+                                  feeling,
                                 );
                               },
                               child: Container(
@@ -153,7 +155,7 @@ class FeelingSelectionScreen extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  emotion,
+                                  feeling,
                                   style: context.textTheme.bodyLarge?.copyWith(
                                     color:
                                         isSelected
@@ -182,7 +184,7 @@ class FeelingSelectionScreen extends StatelessWidget {
                               builder:
                                   (context) => JournalWriteScreenV2(
                                     item: state.selected,
-                                    emotions: state.selectedEmotions,
+                                    feelings: state.selectedFeelings,
                                   ),
                             ),
                           );
