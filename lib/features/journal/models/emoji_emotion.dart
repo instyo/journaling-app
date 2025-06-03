@@ -1,12 +1,16 @@
+import 'package:flutter/material.dart';
+
 class EmojiEmotion {
   final String emoji;
   final String label;
   final List<String> emotion;
+  final Color? color; // Added color property
 
   const EmojiEmotion({
     required this.emoji,
     required this.label,
     required this.emotion,
+    this.color, // Include color in the constructor
   });
 
   factory EmojiEmotion.fromJson(Map<String, dynamic> json) {
@@ -14,11 +18,22 @@ class EmojiEmotion {
       emoji: json['emoji'] as String,
       label: json['label'] as String,
       emotion: List<String>.from(json['emotion'] as List),
+      color: _hexToColor(json['color'] as String), // Parse hex color
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'emoji': emoji, 'label': label, 'emotion': emotion};
+    return {
+      'emoji': emoji,
+      'label': label,
+      'emotion': emotion,
+      'color': color?.toHexTriplet(),
+    };
+  }
+
+  // Helper method to convert hex color to Color
+  static Color _hexToColor(String hexColor) {
+    return Color(int.parse(hexColor.replaceFirst('#', '0xff')));
   }
 }
 
@@ -27,6 +42,7 @@ final List<Map<String, dynamic>> rawEmojiEmotions = [
   {
     'emoji': '😔',
     'label': 'Bad',
+    'color': '#EA2F14',
     'emotion': [
       'Sad',
       'Anxious',
@@ -42,6 +58,7 @@ final List<Map<String, dynamic>> rawEmojiEmotions = [
   {
     'emoji': '😑',
     'label': 'Meh',
+    'color': '#FB9E3A',
     'emotion': [
       'Indifferent',
       'Bored',
@@ -57,6 +74,7 @@ final List<Map<String, dynamic>> rawEmojiEmotions = [
   {
     'emoji': '😐',
     'label': 'Okay',
+    'color': '#FCEF91',
     'emotion': [
       'Calm',
       'Content',
@@ -72,6 +90,7 @@ final List<Map<String, dynamic>> rawEmojiEmotions = [
   {
     'emoji': '🙂',
     'label': 'Good',
+    'color': '#F0F2BD',
     'emotion': [
       'Confident',
       'Grateful',
@@ -90,6 +109,7 @@ final List<Map<String, dynamic>> rawEmojiEmotions = [
   {
     'emoji': '😊',
     'label': 'Great',
+    'color': '#B2CD9C',
     'emotion': [
       'Joyful',
       'Thrilled',
@@ -108,3 +128,8 @@ final List<Map<String, dynamic>> rawEmojiEmotions = [
 
 final List<EmojiEmotion> kEmotionList =
     rawEmojiEmotions.map((json) => EmojiEmotion.fromJson(json)).toList();
+
+extension ColorX on Color {
+  String toHexTriplet() =>
+      '#${(value & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+}

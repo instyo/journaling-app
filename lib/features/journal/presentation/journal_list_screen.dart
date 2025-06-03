@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart'; // For date formatting
-import 'package:journaling/common/widgets/LineChartSample.dart';
+import 'package:journaling/common/widgets/custom_line_graph.dart';
 import 'package:journaling/common/widgets/custom_dialog.dart';
 import 'package:journaling/common/widgets/custom_scaffold.dart';
 import 'package:journaling/common/widgets/mood_card.dart';

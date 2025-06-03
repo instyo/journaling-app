@@ -17,9 +17,11 @@ class StatsCubit extends Cubit<StatsState> {
   Stream<int> get totalJournal$ =>
       stream.map((state) => state.journals.length).distinct();
 
-  Stream<String> get commonMood$ {
+  Stream<EmojiEmotion> get commonMood$ {
     return stream.map((state) {
-      if (state.journals.isEmpty) return '';
+      if (state.journals.isEmpty) {
+        return const EmojiEmotion(emoji: '', label: '', emotion: []);
+      }
       final moodCount = <String, int>{};
 
       for (var journal in state.journals) {
@@ -29,10 +31,21 @@ class StatsCubit extends Cubit<StatsState> {
       }
 
       // Check if moodCount is empty before trying to find the max
-      if (moodCount.isEmpty) return '';
+      if (moodCount.isEmpty) {
+        return const EmojiEmotion(emoji: '', label: '', emotion: []);
+      }
 
       // Find the mood with the highest count
-      return moodCount.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+      final commonMoodKey =
+          moodCount.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+
+      // Find the corresponding EmojiEmotion
+      final commonMood = kEmotionList.firstWhere(
+        (emotion) => emotion.emoji == commonMoodKey,
+        orElse: () => const EmojiEmotion(emoji: '', label: '', emotion: []),
+      );
+
+      return commonMood;
     }).distinct();
   }
 
