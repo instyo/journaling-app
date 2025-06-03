@@ -11,6 +11,7 @@ import 'package:journaling/core/utils/state_status_enum.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/journal/cubit/journal_cubit.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
+import 'package:journaling/features/journal/models/emoji_emotion.dart';
 import 'package:journaling/features/journal/models/journal_entry.dart';
 
 class JournalListScreen extends StatelessWidget {
@@ -77,6 +78,7 @@ class JournalListScreen extends StatelessWidget {
     final cubit = context.read<JournalCubit>();
 
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CalendarStrip(
@@ -107,7 +109,7 @@ class JournalListScreen extends StatelessWidget {
               //           entryTime.minute == 0; // Keep the hour marks
               //     }).toList();
 
-              for (final so in sortedData) print(">> POI ${so.toMap()}");
+              // for (final so in sortedData) print(">> POI ${so.toMap()}");
 
               final empty = SizedBox.expand(
                 child: Center(
@@ -124,6 +126,7 @@ class JournalListScreen extends StatelessWidget {
                           physics: ClampingScrollPhysics(),
 
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               _buildSummarySection(
                                 context,
@@ -166,17 +169,36 @@ class JournalListScreen extends StatelessWidget {
   }
 
   String _calculateMostCommonMood(List<JournalEntry> journals) {
-    final moodCount = <String, int>{};
+    final moodValues = <String, int>{};
 
-    for (var journal in journals) {
-      moodCount[journal.mood] = (moodCount[journal.mood] ?? 0) + 1;
+    // Populate moodValues with the corresponding index from kEmotionList
+    for (var i = 0; i < kEmotionList.length; i++) {
+      moodValues[kEmotionList[i].emoji] = i + 1; // Use emoji as key
     }
 
-    final result = moodCount.entries.reduce(
-      (a, b) => a.value < b.value ? a : b,
-    );
+    int totalMoodValue = 0;
+    int count = 0;
 
-    return "${result.key}(${_getLabel(result.value)})";
+    print("Journals: $journals"); // Debugging line
+
+    for (var journal in journals) {
+      print("Checking mood: ${journal.mood}"); // Debugging line
+      if (moodValues.containsKey(journal.mood)) {
+        totalMoodValue += moodValues[journal.mood]!;
+        count++;
+      }
+    }
+
+    if (count == 0) return "No mood data"; // Handle case with no journals
+
+    final averageMoodValue = (totalMoodValue / count).round();
+
+    // Get the emoji and label for the average mood
+    final emoji = kEmotionList[averageMoodValue - 1].emoji;
+    final label = kEmotionList[averageMoodValue - 1].label;
+
+    // Return the formatted string
+    return "$emoji ($label)"; // Return the emoji and label in the desired format
   }
 
   Widget _buildSummarySection(

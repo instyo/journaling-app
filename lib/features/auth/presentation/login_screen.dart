@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/auth/presentation/signup_screen.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
-import 'package:journaling/features/journal/presentation/journal_list_screen.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
 
 class LoginScreen extends StatelessWidget {
