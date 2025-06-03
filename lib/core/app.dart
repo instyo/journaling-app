@@ -1,21 +1,17 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:journaling/common/widgets/mychart.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/auth/data/auth_repository.dart';
 import 'package:journaling/features/auth/presentation/login_screen.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
 import 'package:journaling/features/journal/cubit/journal_cubit.dart';
 import 'package:journaling/features/journal/data/journal_repository.dart';
-import 'package:journaling/features/journal/presentation/journal_list_screen.dart';
 import 'package:journaling/features/stats/cubit/stats_cubit.dart';
 import 'package:journaling/features/stats/data/stats_repository.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
 import 'package:journaling/features/user/data/user_repository.dart';
 import '../core/theme/theme_cubit.dart';
-import '../core/theme/app_theme.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,14 +40,12 @@ class MyApp extends StatelessWidget {
             create: (context) => UserCubit(context.read<UserRepository>()),
           ),
           BlocProvider(
-            create: (context) => StatsCubit(context.read<StatsRepository>()),
+            create: (context) => StatsCubit(context.read<JournalRepository>()),
           ),
         ],
         child: Builder(
           builder: (context) {
             final themeMode = context.watch<ThemeCubit>().state;
-            final textTheme = Theme.of(context).textTheme;
-
             return MaterialApp(
               title: 'Mood Journal',
               debugShowCheckedModeBanner: false,

@@ -93,6 +93,25 @@ class JournalRepository {
         );
   }
 
+  Stream<List<JournalEntry>> getJournalsInBetweenDates(
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    if (currentUserId == null) return Stream.value([]);
+    return _journalsCollection
+        .where('userId', isEqualTo: currentUserId)
+        .where('createdAt', isGreaterThanOrEqualTo: startDate)
+        .where('createdAt', isLessThan: endDate)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => JournalEntry.fromMap(doc.data(), doc.id))
+                  .toList(),
+        );
+  }
+
   Future<String> getTitle(String journal) async {
     final response = await _dio.postUri(
       Uri.parse('https://api.openai.com/v1/chat/completions'),

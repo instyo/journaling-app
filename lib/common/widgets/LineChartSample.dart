@@ -9,6 +9,7 @@ class CustomLineGraph extends StatefulWidget {
   final String Function(double value)? formatYLabel;
   final String Function(DateTime time, int value)? formatPointLabel;
   final String Function(DateTime time, int value)? formatTooltipLabel;
+  final String Function(DateTime time)? formatXLabel;
 
   const CustomLineGraph({
     super.key,
@@ -18,6 +19,7 @@ class CustomLineGraph extends StatefulWidget {
     this.formatYLabel,
     this.formatPointLabel,
     this.formatTooltipLabel,
+    this.formatXLabel,
   });
 
   @override
@@ -54,13 +56,8 @@ class _CustomLineGraphState extends State<CustomLineGraph> {
           }
 
           setState(() {
-            if (closestIndex != null) {
-              tappedPosition = points[closestIndex];
-              tappedIndex = closestIndex;
-            } else {
-              tappedPosition = null;
-              tappedIndex = null;
-            }
+            tappedPosition = closestIndex != null ? points[closestIndex] : null;
+            tappedIndex = closestIndex;
           });
         },
         child: Stack(
@@ -71,23 +68,25 @@ class _CustomLineGraphState extends State<CustomLineGraph> {
                 widget.lineColor,
                 widget.pointColor,
                 widget.formatYLabel,
+                widget.formatXLabel,
                 widget.formatPointLabel,
-                (pts) => points = pts, // callback to get points from painter
+                (pts) => points = pts,
               ),
               size: Size.infinite,
             ),
-            if (tappedPosition != null && tappedIndex != null)
+            if (tappedPosition != null &&
+                tappedIndex != null &&
+                tappedIndex! < widget.data.length)
               Positioned(
                 left: tappedPosition!.dx + 10,
                 top: tappedPosition!.dy - 30,
                 child: _TooltipBubble(
                   text:
-                      widget.formatTooltipLabel != null
-                          ? widget.formatTooltipLabel!(
-                            widget.data[tappedIndex!].$1,
-                            widget.data[tappedIndex!].$2,
-                          )
-                          : '${widget.data[tappedIndex!].$2}',
+                      widget.formatTooltipLabel?.call(
+                        widget.data[tappedIndex!].$1,
+                        widget.data[tappedIndex!].$2,
+                      ) ??
+                      '${widget.data[tappedIndex!].$2}',
                 ),
               ),
           ],
@@ -109,7 +108,10 @@ class _TooltipBubble extends StatelessWidget {
       color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Text(text, style: TextStyle(fontSize: 12, color: Colors.black)),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 12, color: Colors.black),
+        ),
       ),
     );
   }
@@ -120,6 +122,7 @@ class _LineGraphPainter extends CustomPainter {
   final Color lineColor;
   final Color pointColor;
   final String Function(double value)? formatYLabel;
+  final String Function(DateTime time)? formatXLabel;
   final String Function(DateTime time, int value)? formatPointLabel;
   final void Function(List<Offset>)? onPointsCalculated;
 
@@ -128,13 +131,22 @@ class _LineGraphPainter extends CustomPainter {
     this.lineColor,
     this.pointColor,
     this.formatYLabel,
+    this.formatXLabel,
     this.formatPointLabel,
     this.onPointsCalculated,
   );
 
+  final List<({int value, String label})> ratingScale = [
+    (value: 1, label: 'Bad'),
+    (value: 2, label: 'Meh'),
+    (value: 3, label: 'Okay'),
+    (value: 4, label: 'Good'),
+    (value: 5, label: 'Great'),
+  ];
+
   @override
   void paint(Canvas canvas, Size size) {
-    if (data.isEmpty) return;
+    if (data.isEmpty || size.isEmpty) return;
 
     const leftPadding = 16.0;
     const rightPadding = 60.0;
@@ -145,105 +157,125 @@ class _LineGraphPainter extends CustomPainter {
     final times = sortedData.map((e) => e.$1).toList();
     final values = sortedData.map((e) => e.$2).toList();
 
+    // Handle edge cases for Y values
     final minY = 0.0;
-    final maxY = values.reduce((a, b) => a > b ? a : b).toDouble();
+    final maxY = 5;
+    // values.isNotEmpty
+    //     ? values.reduce((a, b) => a > b ? a : b).toDouble()
+    //     : 1.0;
+    final yRange = (maxY - minY) == 0 ? 1.0 : (maxY - minY);
 
-    final padding = 16.0;
     final chartWidth = size.width - leftPadding - rightPadding;
     final chartHeight = size.height - topPadding - bottomPadding;
 
-    final minX = times.first.millisecondsSinceEpoch.toDouble();
-    final maxX = times.last.millisecondsSinceEpoch.toDouble();
+    // Handle edge cases for X values
+    final minX =
+        times.isNotEmpty ? times.first.millisecondsSinceEpoch.toDouble() : 0;
+    final maxX =
+        times.isNotEmpty ? times.last.millisecondsSinceEpoch.toDouble() : 1;
+    final xRange = (maxX - minX) == 0 ? 1.0 : (maxX - minX);
 
     List<Offset> points = [];
 
     for (int i = 0; i < sortedData.length; i++) {
-      final dx =
-          ((sortedData[i].$1.millisecondsSinceEpoch - minX) / (maxX - minX)) *
+      final xPos =
+          ((sortedData[i].$1.millisecondsSinceEpoch - minX) / xRange) *
               chartWidth +
           leftPadding;
-
-      final dy =
+      final yPos =
           chartHeight -
-          ((sortedData[i].$2 - minY) / (maxY - minY)) * chartHeight +
-          padding / 2;
-      points.add(Offset(dx, dy));
+          ((sortedData[i].$2 - minY) / yRange) * chartHeight +
+          bottomPadding;
+
+      if (xPos.isFinite && yPos.isFinite) {
+        points.add(Offset(xPos, yPos));
+      }
     }
 
-    // Give points back to parent so it can detect taps
     onPointsCalculated?.call(points);
+
+    if (points.isEmpty) return;
 
     // Draw grid lines
     final gridPaint =
         Paint()
           ..color = Colors.grey.shade300
           ..strokeWidth = 1;
+
     const gridLines = 5;
     for (int i = 0; i < gridLines; i++) {
-      final y = padding / 2 + i * (chartHeight / gridLines);
-      canvas.drawLine(
-        Offset(leftPadding, y),
-        Offset(size.width - rightPadding, y),
-        gridPaint,
-      );
+      final y = bottomPadding + i * (chartHeight / gridLines);
+      if (y.isFinite) {
+        canvas.drawLine(
+          Offset(leftPadding, y),
+          Offset(size.width - rightPadding, y),
+          gridPaint,
+        );
+      }
     }
 
     // Draw Y axis labels
-    for (int i = 0; i <= gridLines; i++) {
-      final yValue = maxY - (i * (maxY / gridLines));
-      final y = padding / 2 + i * (chartHeight / gridLines);
+    final textStyle = const TextStyle(fontSize: 12, color: Colors.black);
+    for (final rating in ratingScale) {
+      final yValue = rating.value.toDouble();
+      final y =
+          chartHeight -
+          ((yValue - minY) / yRange * chartHeight) +
+          bottomPadding;
 
-      final label = formatYLabel?.call(yValue) ?? yValue.toStringAsFixed(0);
-      final textSpan = TextSpan(
-        text: label,
-        style: TextStyle(fontSize: 12, color: Colors.black),
-      );
+      final textSpan = TextSpan(text: rating.label, style: textStyle);
       final textPainter = TextPainter(
         text: textSpan,
         textAlign: TextAlign.right,
         textDirection: ui.TextDirection.rtl,
       )..layout(minWidth: 0, maxWidth: 50);
-      textPainter.paint(
-        canvas,
-        Offset(
-          size.width - rightPadding + (rightPadding - textPainter.width) / 2,
-          y - textPainter.height / 2,
-        ),
+
+      final textOffset = Offset(
+        size.width - rightPadding + (rightPadding - textPainter.width) / 2,
+        y - textPainter.height / 2,
       );
+
+      if (textOffset.dx.isFinite && textOffset.dy.isFinite) {
+        textPainter.paint(canvas, textOffset);
+      }
     }
 
     // Draw X axis labels
     final xLabelCount = 4;
-    final labelY = topPadding + chartHeight + 6;
-
     for (int i = 0; i <= xLabelCount; i++) {
       final t = minX + (i / xLabelCount) * (maxX - minX);
       final date = DateTime.fromMillisecondsSinceEpoch(t.toInt());
-      final label = DateFormat.Hm().format(date);
-      final dx = ((t - minX) / (maxX - minX)) * chartWidth + leftPadding;
+      final label = formatXLabel?.call(date) ?? DateFormat.Hm().format(date);
 
-      final textSpan = TextSpan(
-        text: label,
-        style: TextStyle(fontSize: 12, color: Colors.black),
-      );
+      final dx = ((t - minX) / xRange) * chartWidth + leftPadding;
+
+      final textSpan = TextSpan(text: label, style: textStyle);
       final textPainter = TextPainter(
         text: textSpan,
         textAlign: TextAlign.center,
         textDirection: ui.TextDirection.ltr,
       )..layout();
 
-      textPainter.paint(canvas, Offset(dx - textPainter.width / 2, chartHeight));
+      final textOffset = Offset(
+        dx - textPainter.width / 2,
+        chartHeight + bottomPadding,
+      );
+
+      if (textOffset.dx.isFinite && textOffset.dy.isFinite) {
+        textPainter.paint(canvas, textOffset);
+      }
     }
 
     // Draw smoothed line
-    final path = Path();
     if (points.length >= 2) {
-      path.moveTo(points[0].dx, points[0].dy);
+      final path = Path()..moveTo(points[0].dx, points[0].dy);
+
       for (int i = 0; i < points.length - 1; i++) {
         final p0 = points[i];
         final p1 = points[i + 1];
         final controlPoint1 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p0.dy);
         final controlPoint2 = Offset(p0.dx + (p1.dx - p0.dx) / 2, p1.dy);
+
         path.cubicTo(
           controlPoint1.dx,
           controlPoint1.dy,
@@ -253,40 +285,48 @@ class _LineGraphPainter extends CustomPainter {
           p1.dy,
         );
       }
+
+      final paint =
+          Paint()
+            ..color = lineColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2;
+      canvas.drawPath(path, paint);
     }
 
-    final paint =
-        Paint()
-          ..color = lineColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2;
-    canvas.drawPath(path, paint);
-
     // Draw points and labels
+    final pointTextStyle = const TextStyle(fontSize: 12, color: Colors.black);
     for (int i = 0; i < points.length; i++) {
       final point = points[i];
       final (time, value) = sortedData[i];
 
+      // Draw point
       final pointPaint = Paint()..color = pointColor;
       canvas.drawCircle(point, 4, pointPaint);
 
+      // Draw point label
       final label = formatPointLabel?.call(time, value) ?? value.toString();
-      final textSpan = TextSpan(
-        text: label,
-        style: TextStyle(fontSize: 12, color: Colors.black),
-      );
+      final textSpan = TextSpan(text: label, style: pointTextStyle);
       final textPainter = TextPainter(
         text: textSpan,
         textAlign: TextAlign.center,
         textDirection: ui.TextDirection.ltr,
       )..layout();
-      textPainter.paint(
-        canvas,
-        Offset(point.dx - textPainter.width / 2, point.dy - 20),
+
+      final textOffset = Offset(
+        point.dx - textPainter.width / 2,
+        point.dy - 20,
       );
+      if (textOffset.dx.isFinite && textOffset.dy.isFinite) {
+        textPainter.paint(canvas, textOffset);
+      }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _LineGraphPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _LineGraphPainter oldDelegate) {
+    return oldDelegate.data != data ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.pointColor != pointColor;
+  }
 }

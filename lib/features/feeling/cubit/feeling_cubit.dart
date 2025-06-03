@@ -6,7 +6,7 @@ class FeelingCubit extends Cubit<FeelingState> {
   FeelingCubit()
     : super(
         FeelingState(
-          selected: kEmotionList.first,
+          selected: kEmotionList.last,
           selectedEmotions: [],
         ),
       );

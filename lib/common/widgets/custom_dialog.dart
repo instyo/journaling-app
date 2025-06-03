@@ -54,48 +54,50 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
             borderRadius: BorderRadius.circular(Constants.padding),
             boxShadow: [],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                widget.title,
-                textAlign: TextAlign.center,
-                style: context.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  widget.title,
+                  textAlign: TextAlign.center,
+                  style: context.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              SizedBox(height: 15),
-              Text(
-                widget.descriptions,
-                style: context.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 22),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: widget.onDelete,
-                      child: Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        widget.text,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
+                SizedBox(height: 15),
+                Text(
+                  widget.descriptions,
+                  style: context.textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ],
+                SizedBox(height: 22),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: widget.onDelete,
+                        child: Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          widget.text,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Positioned(

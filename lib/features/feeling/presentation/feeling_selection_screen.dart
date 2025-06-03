@@ -5,6 +5,7 @@ import 'package:journaling/core/utils/context_extension.dart';
 import 'package:journaling/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:journaling/features/feeling/cubit/feeling_cubit.dart';
 import 'package:journaling/features/feeling/cubit/feeling_state.dart';
+import 'package:journaling/features/journal/cubit/journal_cubit.dart';
 import 'package:journaling/features/journal/models/emoji_emotion.dart';
 import 'package:journaling/features/journal/presentation/journal_write_screen_v2.dart';
 
@@ -28,6 +29,9 @@ class FeelingSelectionScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.close, color: context.primaryColor),
               onPressed: () {
+                final jCubit = context.read<JournalCubit>();
+
+                jCubit.changeDate(DateTime.now());
                 DashboardScreen.open(context);
               },
             ),

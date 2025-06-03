@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:journaling/common/widgets/LineChartSample.dart';
+import 'package:journaling/common/widgets/custom_scaffold.dart';
+import 'package:journaling/common/widgets/mood_card.dart';
+import 'package:journaling/core/utils/context_extension.dart';
 import 'package:journaling/features/stats/cubit/stats_cubit.dart';
-import '../../../common/constants.dart'; // For Mood enum
+import 'package:pie_chart/pie_chart.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -15,200 +20,216 @@ class _StatsScreenState extends State<StatsScreen> {
   void initState() {
     super.initState();
     // Load stats when the screen initializes
-    context.read<StatsCubit>().loadMoodStats();
+    context.read<StatsCubit>().getJournals();
+  }
+
+  String _getLabel(int value) {
+    switch (value) {
+      case 1:
+        return 'Bad';
+      case 2:
+        return 'Meh';
+      case 3:
+        return 'Okay';
+      case 4:
+        return 'Good';
+      case 5:
+        return 'Great';
+      default:
+        return '';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox.expand();
-    // return Scaffold(
-    //   appBar: AppBar(title: const Text('Mood Statistics')),
-    //   body: BlocBuilder<StatsCubit, StatsState>(
-    //     builder: (context, state) {
-    //       if (state is StatsLoading) {
-    //         return const Center(child: CircularProgressIndicator());
-    //       } else if (state is StatsError) {
-    //         return Center(child: Text('Error: ${state.message}'));
-    //       } else if (state is StatsLoaded) {
-    //         if (state.moodCounts.isEmpty ||
-    //             state.moodCounts.values.every((element) => element == 0)) {
-    //           return const Center(
-    //             child: Text('No journal entries found yet to show stats.'),
-    //           );
-    //         }
+    final cubit = context.read<StatsCubit>();
 
-    //         final Map<Mood, int> counts = state.moodCounts;
-    //         final double totalEntries = counts.values.fold(
-    //           0,
-    //           (sum, count) => sum + count,
-    //         );
+    return CustomScaffold(
+      title: "Statistics",
+      actions: [
+        IconButton(
+          onPressed: () {
+            cubit.createDummy(context.userId);
+          },
+          icon: Icon(Icons.dangerous),
+        ),
+      ],
+      body: SizedBox.expand(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Last 7 days: ",
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  StreamBuilder<String>(
+                    stream: cubit.commonMood$,
+                    initialData: "",
+                    builder: (context, snapshot) {
+                      return MoodCard(
+                        title: "Common Mood",
+                        value: "${snapshot.data}",
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  StreamBuilder<int>(
+                    stream: cubit.totalJournal$,
+                    initialData: 0,
+                    builder: (context, snapshot) {
+                      return MoodCard(
+                        title: "Total Journals",
+                        value: "${snapshot.data}",
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  MoodCard(title: "Common Feeling", value: ""),
+                  const SizedBox(width: 8),
+                  MoodCard(title: "Common Mood", value: ""),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Mood Levels: ",
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 32),
+                child: StreamBuilder<List<(DateTime, int)>>(
+                  stream: cubit.averageMoodsIn7Days$,
+                  initialData: [],
+                  builder: (context, snapshot) {
+                    if (snapshot.data!.isEmpty) {
+                      const Text("No moods recorded.");
+                    }
 
-    //         // Prepare data for BarChart
-    //         final List<BarChartGroupData> barGroups = [];
-    //         int index = 0;
-    //         for (var mood in Mood.values) {
-    //           final count = counts[mood] ?? 0;
-    //           barGroups.add(
-    //             BarChartGroupData(
-    //               x: index,
-    //               barRods: [
-    //                 BarChartRodData(
-    //                   toY: count.toDouble(),
-    //                   color: _getMoodColor(
-    //                     mood,
-    //                   ), // Helper to get a color for each mood
-    //                   width: 16,
-    //                   borderRadius: BorderRadius.circular(4),
-    //                 ),
-    //               ],
-    //             ),
-    //           );
-    //           index++;
-    //         }
 
-    //         return SingleChildScrollView(
-    //           padding: const EdgeInsets.all(16.0),
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               Text(
-    //                 'Mood Distribution (Total: ${totalEntries.toInt()} entries)',
-    //                 style: Theme.of(context).textTheme.headlineSmall,
-    //               ),
-    //               const SizedBox(height: 24),
-    //               SizedBox(
-    //                 height: 250,
-    //                 child: BarChart(
-    //                   BarChartData(
-    //                     barGroups: barGroups,
-    //                     titlesData: FlTitlesData(
-    //                       show: true,
-    //                       rightTitles: const AxisTitles(
-    //                         sideTitles: SideTitles(showTitles: false),
-    //                       ),
-    //                       topTitles: const AxisTitles(
-    //                         sideTitles: SideTitles(showTitles: false),
-    //                       ),
-    //                       bottomTitles: AxisTitles(
-    //                         sideTitles: SideTitles(
-    //                           showTitles: true,
-    //                           getTitlesWidget: (value, meta) {
-    //                             // Display mood emoji on x-axis
-    //                             return Padding(
-    //                               padding: const EdgeInsets.only(top: 8.0),
-    //                               child: Text(Mood.values[value.toInt()].emoji),
-    //                             );
-    //                           },
-    //                           reservedSize: 30,
-    //                         ),
-    //                       ),
-    //                       leftTitles: AxisTitles(
-    //                         sideTitles: SideTitles(
-    //                           showTitles: true,
-    //                           getTitlesWidget: (value, meta) {
-    //                             if (value % 1 == 0) {
-    //                               // Only show integers
-    //                               return Text(value.toInt().toString());
-    //                             }
-    //                             return const Text('');
-    //                           },
-    //                           reservedSize: 40,
-    //                         ),
-    //                       ),
-    //                     ),
-    //                     gridData: const FlGridData(show: false),
-    //                     borderData: FlBorderData(
-    //                       show: true,
-    //                       border: Border.all(
-    //                         color: const Color(0xff37434d),
-    //                         width: 1,
-    //                       ),
-    //                     ),
-    //                     barTouchData: BarTouchData(
-    //                       touchTooltipData: BarTouchTooltipData(
-    //                         // tooltipBgColor: Colors.blueGrey,
-    //                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
-    //                           final mood = Mood.values[group.x.toInt()];
-    //                           return BarTooltipItem(
-    //                             // '${mood.emoji} ${mood.name.capitalize()}\n',
-    //                             '',
-    //                             const TextStyle(
-    //                               color: Colors.white,
-    //                               fontWeight: FontWeight.bold,
-    //                             ),
-    //                             children: [
-    //                               TextSpan(
-    //                                 text: '${rod.toY.toInt()} entries',
-    //                                 style: const TextStyle(
-    //                                   color: Colors.white,
-    //                                   fontSize: 14,
-    //                                   fontWeight: FontWeight.w500,
-    //                                 ),
-    //                               ),
-    //                             ],
-    //                           );
-    //                         },
-    //                       ),
-    //                     ),
-    //                   ),
-    //                 ),
-    //               ),
-    //               const SizedBox(height: 32),
-    //               // Optional: Mood labels with percentages
-    //               Text(
-    //                 'Mood Breakdown:',
-    //                 style: Theme.of(context).textTheme.titleMedium,
-    //               ),
-    //               const SizedBox(height: 8),
-    //               ...Mood.values.map((mood) {
-    //                 final count = counts[mood] ?? 0;
-    //                 final percentage =
-    //                     totalEntries > 0 ? (count / totalEntries * 100) : 0;
-    //                 return Padding(
-    //                   padding: const EdgeInsets.symmetric(vertical: 4.0),
-    //                   child: Row(
-    //                     children: [
-    //                       Icon(
-    //                         Icons.circle,
-    //                         size: 16,
-    //                         color: _getMoodColor(mood),
-    //                       ),
-    //                       const SizedBox(width: 8),
-    //                       Text(
-    //                         // '${mood.emoji} ${mood.name.capitalize()}: $count entries (${percentage.toStringAsFixed(1)}%)',
-    //                         '',
-    //                         style: Theme.of(context).textTheme.bodyLarge,
-    //                       ),
-    //                     ],
-    //                   ),
-    //                 );
-    //               }).toList(),
-    //             ],
-    //           ),
-    //         );
-    //       }
-    //       return const SizedBox.shrink();
-    //     },
-    //   ),
-    // );
-  }
+                    return CustomLineGraph(
+                      data: snapshot.data!,
+                      lineColor: context.primaryColor,
+                      pointColor: Colors.orange,
+                      formatTooltipLabel: (time, value) {
+                        return DateFormat('dd/MM/yyyy').format(time);
+                      },
+                      formatPointLabel: (d, i) {
+                        // return _getEmoji(i);
+                        return "";
+                      },
+                      formatYLabel: (val) {
+                        return _getLabel(val.toInt());
+                      },
+                      formatXLabel: (time) {
+                        return DateFormat('dd LLL').format(time);
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
 
-  // Helper function to get a color for each mood
-  Color _getMoodColor(Mood mood) {
-    return Colors.pink;
-    // switch (mood) {
-    //   case Mood.optimistic:
-    //     return Colors.green;
-    //   case Mood.melancholic:
-    //     return Colors.blueGrey;
-    //   case Mood.irritable:
-    //     return Colors.red;
-    //   case Mood.serene:
-    //     return Colors.blue;
-    //   case Mood.anxious:
-    //     return Colors.orange;
-    //   default:
-    //     return Colors.grey;
-    // }
+              StreamBuilder<Map<String, int>>(
+                initialData: {},
+                stream: cubit.emotionsCount$,
+                builder: (context, snapshot) {
+                  final data = {
+                    for (var entry in snapshot.data!.entries.take(5))
+                      entry.key: entry.value.toDouble(),
+                  };
+
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Common Feelings: ",
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Spacer(),
+                          TextButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("All Emotions"),
+                                    content: SingleChildScrollView(
+                                      child: Wrap(
+                                        children:
+                                            snapshot.data!.entries.map((entry) {
+                                              return Padding(
+                                                padding: const EdgeInsets.all(
+                                                  4.0,
+                                                ),
+                                                child: Chip(
+                                                  label: Text(
+                                                    '${entry.key}: ${entry.value}',
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList(),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("Close"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Text("See all"),
+                          ),
+                        ],
+                      ),
+
+                      if (!snapshot.hasData || snapshot.data!.isEmpty)
+                        const Text("No emotions recorded.")
+                      else
+                        PieChart(
+                          dataMap: data,
+                          formatChartValues: (val) {
+                            return '${val.toInt()}';
+                          },
+                        ),
+                    ],
+                  );
+
+                  // return Wrap(
+                  //   children:
+                  //       snapshot.data!.entries.map((entry) {
+                  //         return Padding(
+                  //           padding: const EdgeInsets.all(4.0),
+                  //           child: Chip(
+                  //             label: Text('${entry.key}: ${entry.value}'),
+                  //           ),
+                  //         );
+                  //       }).toList(),
+                  // );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

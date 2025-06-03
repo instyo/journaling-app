@@ -4,13 +4,13 @@ import 'package:intl/intl.dart'; // For date formatting
 import 'package:journaling/common/widgets/LineChartSample.dart';
 import 'package:journaling/common/widgets/custom_dialog.dart';
 import 'package:journaling/common/widgets/custom_scaffold.dart';
+import 'package:journaling/common/widgets/mood_card.dart';
 import 'package:journaling/common/widgets/stripped_calendar.dart';
 import 'package:journaling/core/utils/context_extension.dart';
 import 'package:journaling/core/utils/state_status_enum.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/journal/cubit/journal_cubit.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
-import 'package:journaling/features/journal/models/emoji_emotion.dart';
 import 'package:journaling/features/journal/models/journal_entry.dart';
 
 class JournalListScreen extends StatelessWidget {
@@ -22,24 +22,6 @@ class JournalListScreen extends StatelessWidget {
       title: 'My Journals',
       actions: _buildActions(context),
       body: BlocListener<JournalCubit, JournalState>(
-        // builder: (context, state) {
-        //   if (state is JournalInitial) {
-        //     return const Center(child: Text('Loading journals...'));
-        //   }
-
-        //   if (state is JournalLoading) {
-        //     return const Center(child: CircularProgressIndicator());
-        //   }
-
-        //   if (state is JournalError) {
-        //     return Center(child: Text('Error: ${state.message}'));
-        //   }
-
-        //   if (state is JournalsLoaded) {
-        //     return _buildJournalContent(context, state);
-        //   }
-        //   return const SizedBox.shrink(); // Fallback
-        // },
         listener: (BuildContext context, JournalState state) {
           if (state.status == StateStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -70,8 +52,25 @@ class JournalListScreen extends StatelessWidget {
     ];
   }
 
-  String _getEmoji(int value) {
-    return rawEmojiEmotions[value - 1]['emoji'] ?? '❤️';
+  // String _getEmoji(int value) {
+  //   return rawEmojiEmotions[value - 1]['emoji'] ?? '❤️';
+  // }
+
+  String _getLabel(int value) {
+    switch (value) {
+      case 1:
+        return 'Bad';
+      case 2:
+        return 'Meh';
+      case 3:
+        return 'Okay';
+      case 4:
+        return 'Good';
+      case 5:
+        return 'Great';
+      default:
+        return '';
+    }
   }
 
   Widget _buildJournalContent(BuildContext context) {
@@ -83,7 +82,6 @@ class JournalListScreen extends StatelessWidget {
         CalendarStrip(
           key: ValueKey('kontolero'),
           onDateSelected: (date) {
-            print(">> Date : $date");
             cubit.changeDate(date);
           },
         ),
@@ -95,6 +93,21 @@ class JournalListScreen extends StatelessWidget {
               final journals = snapshot.data!;
               final sortedData = [...journals]
                 ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+              // Only take data per hours
+              // final filteredData =
+              //     sortedData.where((entry) {
+              //       final entryTime = entry.createdAt;
+              //       return sortedData.any((otherEntry) {
+              //             final otherTime = otherEntry.createdAt;
+              //             return otherTime.isAfter(entryTime) &&
+              //                 otherTime.isBefore(
+              //                   entryTime.add(Duration(hours: 1)),
+              //                 );
+              //           }) ||
+              //           entryTime.minute == 0; // Keep the hour marks
+              //     }).toList();
+
+              for (final so in sortedData) print(">> POI ${so.toMap()}");
 
               final empty = SizedBox.expand(
                 child: Center(
@@ -119,34 +132,25 @@ class JournalListScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 32),
 
-                              CustomLineGraph(
-                                data:
-                                    sortedData.map((e) => e.moodLevel).toList(),
-                                lineColor: Colors.green,
-                                pointColor: Colors.orange,
-                                formatTooltipLabel: (time, value) {
-                                  return DateFormat.Hm().format(time);
-                                },
-                                formatPointLabel: (d, i) {
-                                  return _getEmoji(i);
-                                },
-                                formatYLabel: (val) {
-                                  switch (val) {
-                                    case 1:
-                                      return 'Bad';
-                                    case 2:
-                                      return 'Meh';
-                                    case 3:
-                                      return 'Okay';
-                                    case 4:
-                                      return 'Good';
-                                    case 5:
-                                      return 'Great';
-                                    default:
-                                      return '';
-                                  }
-                                },
-                              ),
+                              if (sortedData.length > 1)
+                                CustomLineGraph(
+                                  data:
+                                      sortedData
+                                          .map((e) => e.moodLevel)
+                                          .toList(),
+                                  lineColor: context.primaryColor,
+                                  pointColor: Colors.orange,
+                                  formatTooltipLabel: (time, value) {
+                                    return DateFormat.Hm().format(time);
+                                  },
+                                  formatPointLabel: (d, i) {
+                                    // return _getEmoji(i);
+                                    return "";
+                                  },
+                                  formatYLabel: (val) {
+                                    return _getLabel(val.toInt());
+                                  },
+                                ),
 
                               const SizedBox(height: 8),
                               _buildJournalList(context, journals),
@@ -163,10 +167,16 @@ class JournalListScreen extends StatelessWidget {
 
   String _calculateMostCommonMood(List<JournalEntry> journals) {
     final moodCount = <String, int>{};
+
     for (var journal in journals) {
       moodCount[journal.mood] = (moodCount[journal.mood] ?? 0) + 1;
     }
-    return moodCount.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+
+    final result = moodCount.entries.reduce(
+      (a, b) => a.value < b.value ? a : b,
+    );
+
+    return "${result.key}(${_getLabel(result.value)})";
   }
 
   Widget _buildSummarySection(
@@ -187,40 +197,12 @@ class JournalListScreen extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            _buildMoodCard(context, "Common Mood", mostCommonMood),
+            MoodCard(title: "Common Mood", value: mostCommonMood),
             const SizedBox(width: 16), // Space between the boxes
-            _buildMoodCard(context, "Total Journals", "$totalJournals"),
+            MoodCard(title: "Total Journals", value: "$totalJournals"),
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildMoodCard(BuildContext context, String title, String value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.cardColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              value,
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -273,17 +255,15 @@ class JournalListScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    DateFormat(
-                      'MMM dd, yyyy hh:mm a',
-                    ).format(journal.createdAt),
-                    style: context.textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
                     journal.title,
                     style: context.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('hh:mm a').format(journal.createdAt),
+                    style: context.textTheme.bodySmall,
                   ),
                 ],
               ),

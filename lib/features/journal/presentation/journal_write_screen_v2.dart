@@ -124,6 +124,10 @@ class JournalWriteScreenV2 extends StatelessWidget {
                             await cubit.createJournal(journal);
                           }
 
+                          final jCubit = context.read<JournalCubit>();
+
+                          jCubit.changeDate(DateTime.now());
+
                           DashboardScreen.open(context);
                         },
                         label: Text("Submit"),
