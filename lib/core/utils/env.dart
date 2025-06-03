@@ -1,2 +1,0 @@
-final String kOpenAIKey =
-    "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";

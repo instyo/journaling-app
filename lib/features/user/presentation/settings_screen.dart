@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
-import 'package:journaling/features/user/models/app_user.dart';
 import '../../../core/theme/theme_cubit.dart'; // Import ThemeCubit
 
 class SettingsScreen extends StatefulWidget {
@@ -33,18 +31,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _nameController.text = userState.user.name;
       _usernameController.text = userState.user.username ?? '';
       _descriptionController.text = userState.user.description ?? '';
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      setState(() {
-        _pickedProfileImage = File(pickedFile.path);
-      });
     }
   }
 
@@ -100,13 +86,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
         },
         builder: (context, state) {
-          AppUser? currentUser;
-          if (state is UserProfileLoaded) {
-            currentUser = state.user;
-          } else if (state is ProfileUpdateSuccess) {
-            currentUser = state.user;
-          }
-
           if (state is UserProfileLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -118,32 +97,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.grey[300],
-                      backgroundImage:
-                          _pickedProfileImage != null
-                              ? FileImage(_pickedProfileImage!)
-                              : (currentUser?.profilePictureUrl != null
-                                      ? NetworkImage(
-                                        currentUser!.profilePictureUrl!,
-                                      )
-                                      : null)
-                                  as ImageProvider<Object>?,
-                      child:
-                          _pickedProfileImage == null &&
-                                  currentUser?.profilePictureUrl == null
-                              ? Icon(
-                                Icons.add_a_photo,
-                                size: 40,
-                                color: Colors.grey[600],
-                              )
-                              : null,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(
