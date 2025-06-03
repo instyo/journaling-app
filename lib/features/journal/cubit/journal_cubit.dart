@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:journaling/core/utils/state_status_enum.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/journal_repository.dart';
 import '../models/journal_entry.dart';
 
@@ -11,7 +13,20 @@ class JournalCubit extends Cubit<JournalState> {
 
   JournalCubit(this._journalRepository) : super(JournalState()) {
     getJournalsByDate(DateTime.now());
+    loadPreferences();
   }
+
+  Future<void> loadPreferences() async {
+    final useAI = await isUseAI();
+    showTitleField$.add(!useAI);
+  }
+
+  Future<bool> isUseAI() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('useAI') ?? false;
+  }
+
+  final showTitleField$ = BehaviorSubject<bool>.seeded(true);
 
   Stream<List<JournalEntry>> get journals$ =>
       stream.map((e) => e.journals).distinct();
@@ -49,7 +64,12 @@ class JournalCubit extends Cubit<JournalState> {
     emit(state.copyWith(status: StateStatus.loading));
 
     try {
-      final title = await _journalRepository.getTitle(newEntry.content);
+      final useAI = await isUseAI();
+
+      final title =
+          !useAI
+              ? newEntry.title
+              : await _journalRepository.getTitle(newEntry.content);
 
       await _journalRepository.addJournal(newEntry.copyWith(title: title));
       // State will update automatically due to listening to stream

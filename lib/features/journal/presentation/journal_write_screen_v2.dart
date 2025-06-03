@@ -47,12 +47,13 @@ class JournalWriteScreenV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textController = TextEditingController();
+    final titleController = TextEditingController();
     final cubit = context.read<JournalCubit>();
 
     return CustomScaffold(
       title: "Write Your Journal",
       body: BlocBuilder<JournalCubit, JournalState>(
-        bloc: cubit,
+        bloc: cubit..loadPreferences(),
         builder: (context, state) {
           final bool isLoading = state.status == StateStatus.loading;
 
@@ -64,6 +65,40 @@ class JournalWriteScreenV2 extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (isLoading) LinearProgressIndicator(),
+                    StreamBuilder<bool>(
+                      initialData: false,
+                      stream: cubit.showTitleField$,
+                      builder: (context, snapshot) {
+                        if (snapshot.data != true) {
+                          return const SizedBox();
+                        }
+
+                        return Container(
+                          margin: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.grey.shade300,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              hintText: 'Title',
+                              hintStyle: TextStyle(color: Colors.grey.shade500),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                            ),
+                            onChanged: (text) {
+                              // Handle title input change if needed
+                              titleController.text = text;
+                            },
+                          ),
+                        );
+                      },
+                    ),
                     MarkdownInputV2(
                       initialValue: entry?.content,
                       onChanged: (text) {
@@ -106,8 +141,11 @@ class JournalWriteScreenV2 extends StatelessWidget {
                           backgroundColor: const Color(0xFFF0F5ED),
                         ),
                         onPressed: () async {
+                          final title = titleController.text;
+
                           if (isEdit) {
                             final journal = entry?.copyWith(
+                              title: title,
                               content: textController.text,
                             );
 
@@ -115,8 +153,7 @@ class JournalWriteScreenV2 extends StatelessWidget {
                           } else {
                             final journal = JournalEntry(
                               userId: context.userId,
-                              title:
-                                  'Journal ${DateTime.now().toIso8601String()}',
+                              title: title,
                               content: textController.text,
                               createdAt: DateTime.now(),
                               feelings: feelings,

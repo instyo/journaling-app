@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:journaling/core/utils/env.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/journal_entry.dart';
 import 'package:dio/dio.dart';
 
@@ -113,11 +113,18 @@ class JournalRepository {
   }
 
   Future<String> getTitle(String journal) async {
+    final prefs = await SharedPreferences.getInstance();
+    final apiUrl =
+        prefs.getString('api_url') ??
+        'https://api.openai.com/v1/chat/completions';
+    final apiToken = prefs.getString('api_token') ?? '';
+    final model = prefs.getString('model') ?? 'gpt-4.1-nano';
+
     final response = await _dio.postUri(
-      Uri.parse('https://api.openai.com/v1/chat/completions'),
+      Uri.parse(apiUrl),
       options: Options(
         headers: {
-          'Authorization': 'Bearer $kOpenAIKey',
+          'Authorization': 'Bearer $apiToken',
           'Content-Type': 'application/json',
         },
       ),
@@ -130,7 +137,7 @@ class JournalRepository {
           },
           {"role": "user", "content": journal},
         ],
-        "model": "gpt-4.1-nano",
+        "model": model,
         "stream": false,
         "temperature": 0.7,
         "max_tokens": 500,

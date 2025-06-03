@@ -139,12 +139,12 @@ class _LineGraphPainter extends CustomPainter {
     this.onPointsCalculated,
   );
 
-  final List<({int value, String label})> ratingScale = [
-    (value: 1, label: 'Bad'),
-    (value: 2, label: 'Meh'),
-    (value: 3, label: 'Okay'),
-    (value: 4, label: 'Good'),
-    (value: 5, label: 'Great'),
+  final List<MoodEnum> ratingScale = [
+    MoodEnum.sad,
+    MoodEnum.meh,
+    MoodEnum.okay,
+    MoodEnum.nice,
+    MoodEnum.great,
   ];
 
   @override

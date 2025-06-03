@@ -7,6 +7,7 @@ import 'package:journaling/features/auth/presentation/login_screen.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
 import 'package:journaling/features/journal/cubit/journal_cubit.dart';
 import 'package:journaling/features/journal/data/journal_repository.dart';
+import 'package:journaling/features/settings/cubit/settings_cubit.dart';
 import 'package:journaling/features/stats/cubit/stats_cubit.dart';
 import 'package:journaling/features/stats/data/stats_repository.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => StatsCubit(context.read<JournalRepository>()),
           ),
+          BlocProvider(create: (context) => SettingsCubit()),
         ],
         child: Builder(
           builder: (context) {

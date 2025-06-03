@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/core/utils/state_status_enum.dart';
 import 'package:journaling/features/journal/data/journal_repository.dart';
-import 'package:journaling/features/journal/models/emoji_emotion.dart';
 import 'package:journaling/features/journal/models/journal_entry.dart';
 
 part 'stats_state.dart';
@@ -93,10 +92,17 @@ class StatsCubit extends Cubit<StatsState> {
         // Calculate the average mood as an integer
         final averageMood =
             totalMoods > 0
-                ? (entry.value.map((mood) => mood.value).reduce((a, b) => a + b) / totalMoods).round()
+                ? (entry.value
+                            .map((mood) => mood.value)
+                            .reduce((a, b) => a + b) /
+                        totalMoods)
+                    .round()
                 : 0; // Default to 0 if no moods
 
-        return (date, MoodEnum.values[averageMood - 1]); // Convert back to MoodEnum
+        return (
+          date,
+          MoodEnum.values[averageMood - 1],
+        ); // Convert back to MoodEnum
       }).toList();
     });
   }
@@ -128,12 +134,11 @@ class StatsCubit extends Cubit<StatsState> {
   List<JournalEntry> generateDummyData(String userId) {
     final List<JournalEntry> dummyEntries = [];
     final today = DateTime.now();
+    final feelings = MoodEnum.values.map((mood) => mood.feelings).toList();
 
     for (int i = 0; i < 7; i++) {
       final date = today.subtract(Duration(days: i));
       for (int j = 0; j < 3; j++) {
-        final randomData =
-            kEmotionList[Random().nextInt(kEmotionList.length - 1)];
         dummyEntries.add(
           JournalEntry(
             userId: userId,
@@ -142,7 +147,7 @@ class StatsCubit extends Cubit<StatsState> {
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
             // mood: randomData.emoji,
             // label: randomData.label,
-            feelings: (randomData.feelings.toList()..shuffle()).sublist(0, 6),
+            feelings: feelings[Random().nextInt(5) + 1].sublist(0, 6),
             createdAt: date.subtract(Duration(hours: Random().nextInt(9) + 1)),
             mood: MoodEnum.values[Random().nextInt(5) + 1],
           ),

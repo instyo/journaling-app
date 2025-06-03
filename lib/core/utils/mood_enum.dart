@@ -19,7 +19,7 @@ extension MoodEnumX on MoodEnum {
     final result = rawFeelings.firstWhere((e) => e['value'] == value);
     return result['feelings'];
   }
-
+  
   String get moodLabel => '$emoji ($label)';
 
   List<MoodEnum> get lists => MoodEnum.values.sublist(1, 6);
