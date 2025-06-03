@@ -10,7 +10,7 @@ import 'package:journaling/features/journal/models/journal_entry.dart';
 part 'stats_state.dart';
 
 class StatsCubit extends Cubit<StatsState> {
-  final JournalRepository _journalRepository;
+  final IJournalRepository _journalRepository;
 
   StatsCubit(this._journalRepository) : super(StatsState());
 

@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => AuthRepository()),
-        RepositoryProvider(create: (context) => JournalRepository()),
+        RepositoryProvider(create: (context) => FirebaseJournalRepository()),
         RepositoryProvider(create: (context) => UserRepository()),
         RepositoryProvider(create: (context) => StatsRepository()), // ADD THIS
         // Add StatsRepository here
@@ -35,13 +35,16 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create:
-                (context) => JournalCubit(context.read<JournalRepository>()),
+                (context) =>
+                    JournalCubit(context.read<FirebaseJournalRepository>()),
           ),
           BlocProvider(
             create: (context) => UserCubit(context.read<UserRepository>()),
           ),
           BlocProvider(
-            create: (context) => StatsCubit(context.read<JournalRepository>()),
+            create:
+                (context) =>
+                    StatsCubit(context.read<FirebaseJournalRepository>()),
           ),
           BlocProvider(create: (context) => SettingsCubit()),
         ],
