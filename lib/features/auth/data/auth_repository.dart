@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -46,6 +47,40 @@ class AuthRepository {
     } else {
       throw Exception('Facebook sign in aborted: ${result.status}');
     }
+  }
+
+  Future<UserCredential> signInWithFacebookIos() async {
+    // Check if the user has authorized the app to use the tracking data (only for iOS)
+    TrackingStatus? status;
+    if (Platform.isIOS) {
+      status = await AppTrackingTransparency.trackingAuthorizationStatus;
+    }
+
+    // Trigger the sign-in flow
+    final rawNonce = generateNonce();
+    final nonce = sha256ofString(rawNonce);
+    final result = await FacebookAuth.instance.login(
+      loginTracking:
+          status == TrackingStatus.authorized
+              ? LoginTracking.enabled
+              : LoginTracking.limited,
+      loginBehavior: LoginBehavior.nativeWithFallback,
+      permissions: [
+        'email',
+        if (status == TrackingStatus.authorized) 'public_profile',
+      ],
+      nonce: nonce,
+    );
+
+    // Create a credential from the access token
+    OAuthCredential credential = OAuthCredential(
+      providerId: 'facebook.com',
+      signInMethod: 'oauth',
+      idToken: result.accessToken!.tokenString,
+      rawNonce: rawNonce,
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   Future<UserCredential> signInWithGoogleWeb() async {

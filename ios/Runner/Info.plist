@@ -32,7 +32,30 @@
 				<string>com.googleusercontent.apps.800762509525-tc0nphmhpve421f0j24gqp5blrsnfsmc</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb892062071641836</string>
+			</array>
+		</dict>
 	</array>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>This identifier will be used to deliver personalized ads to you.</string>
+    <key>FacebookAppID</key>
+    <string>892062071641836</string>
+    <key>FacebookClientToken</key>
+    <string>9d159838209ac273358ba62ba7a39340</string>
+    <key>FacebookDisplayName</key>
+    <string>Mood Journal</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>fbapi</string>
+      <string>fb-messenger-share-api</string>
+    </array>
+    <key>FacebookAutoLogAppEventsEnabled</key>
+    <true/>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 // ignore: depend_on_referenced_packages
 import 'package:equatable/equatable.dart';
@@ -37,7 +39,11 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signInWithFacebook() async {
     emit(AuthLoading());
     try {
-      await _authRepository.signInWithFacebook();
+      if (Platform.isIOS) {
+        await _authRepository.signInWithFacebookIos();
+      } else {
+        await _authRepository.signInWithFacebook();
+      }
     } catch (e) {
       emit(AuthError(e.toString()));
       emit(Unauthenticated()); // Revert to unauthenticated on error
