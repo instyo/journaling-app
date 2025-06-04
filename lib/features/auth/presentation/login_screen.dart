@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:journaling/core/utils/context_extension.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
-import 'package:journaling/features/auth/presentation/email_login_screen.dart';
 import 'package:journaling/features/auth/presentation/signup_screen.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool rememberMe = false;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Welcome to Mood Journal'),
-        centerTitle: true,
-      ),
+      backgroundColor: Colors.white,
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
@@ -31,84 +37,165 @@ class LoginScreen extends StatelessWidget {
             );
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Login Failed: ${state.message}')),
+              SnackBar(
+                content: Text('Login Failed: ${state.message}'),
+                duration: Duration(seconds: 4),
+              ),
             );
           }
         },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Sign in to start journaling your moods.',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              BlocBuilder<AuthCubit, AuthState>(
-                builder: (context, state) {
-                  if (state is AuthLoading) {
-                    return const CircularProgressIndicator();
-                  }
-                  return ElevatedButton.icon(
-                    onPressed:
-                        () => context.read<AuthCubit>().signInWithGoogle(),
-                    icon: Image.asset(
-                      'assets/images/google_logo.png', // You'll need to add a Google logo image
-                      height: 24.0,
-                      width: 24.0,
-                    ),
-                    label: const Text('Sign in with Google'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      textStyle: const TextStyle(fontSize: 18),
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        side: const BorderSide(color: Colors.grey),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Add other social login buttons here (e.g., Facebook, Apple)
-              // Add a login with email/password option
-              const SizedBox(height: 24),
-              const Text(
-                '- OR -',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: ListView(
+              children: [
+                const SizedBox(height: 40),
+                Text('Sign in to', style: context.textTheme.displaySmall),
+                Text(
+                  'Mood Journal 😊',
+                  style: context.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 40),
 
-              // Email and Password fields could go here, or on a separate 'Login with Email' screen.
-              // For simplicity, let's add a button to navigate to email/password login/signup.
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const EmailLoginScreen()),
-                  );
-                },
-                child: const Text(
-                  'Login with Email',
-                ), // More robust if you add a specific screen
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const SignupScreen()),
-                  );
-                },
-                child: const Text('Don\'t have an account? Sign Up'),
-              ),
-            ],
+                // Email Field
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    hintText: 'Type here....',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Password Field
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    hintText: 'Type here....',
+                    suffixIcon: Icon(Icons.visibility_off),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Sign In Button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.primaryColor,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    context.read<AuthCubit>().signInEmail(
+                      emailController.text,
+                      passwordController.text,
+                    );
+                  },
+                  child: Text(
+                    'Sign in',
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // OR Divider
+                Row(
+                  children: const [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('or continue with'),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Social Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        context.read<AuthCubit>().signInWithFacebook();
+                      },
+                      child: _socialButton('assets/images/fb.png'),
+                    ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () {
+                        context.read<AuthCubit>().signInWithGoogle();
+                      },
+                      child: _socialButton('assets/images/google.png'),
+                    ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () {
+                        context.read<AuthCubit>().signInWithApple();
+                      },
+                      child: _socialButton('assets/images/apple.png'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+
+                // Sign up Prompt
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don't have an account? "),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SignupScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Sign up',
+                        style: TextStyle(
+                          color: context.primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _socialButton(String assetPath) {
+    return Container(
+      width: 50,
+      height: 50,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Image.asset(assetPath),
     );
   }
 }

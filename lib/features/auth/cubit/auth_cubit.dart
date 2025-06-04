@@ -44,6 +44,17 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> signInWithApple() async {
+    emit(AuthLoading());
+    try {
+      await _authRepository.signInWithApple();
+      // State change to Authenticated handled by stream listener
+    } catch (e) {
+      emit(AuthError(e.toString()));
+      emit(Unauthenticated());
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await _authRepository.signOut();
