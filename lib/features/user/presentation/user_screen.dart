@@ -1,22 +1,19 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
-import '../../../core/theme/theme_cubit.dart'; // Import ThemeCubit
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+class UserScreen extends StatefulWidget {
+  const UserScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  State<UserScreen> createState() => _UserScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _UserScreenState extends State<UserScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _usernameController;
   late TextEditingController _descriptionController;
-  File? _pickedProfileImage;
 
   @override
   void initState() {
@@ -40,7 +37,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         name: _nameController.text.trim(),
         username: _usernameController.text.trim(),
         description: _descriptionController.text.trim(),
-        profilePic: _pickedProfileImage,
       );
     }
   }
@@ -76,7 +72,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _nameController.text = state.user.name;
             _usernameController.text = state.user.username ?? '';
             _descriptionController.text = state.user.description ?? '';
-            _pickedProfileImage = null; // Clear picked image after upload
           } else if (state is UserProfileLoaded) {
             // Update controllers if data is loaded, especially useful if screen
             // was opened before data was fully loaded
@@ -129,34 +124,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     maxLines: 3,
                     keyboardType: TextInputType.multiline,
-                  ),
-                  const SizedBox(height: 32),
-                  // Theme Selection
-                  Text(
-                    'App Theme',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 16),
-                  BlocBuilder<ThemeCubit, ThemeMode>(
-                    builder: (context, currentThemeMode) {
-                      return Column(
-                        children:
-                            ThemeMode.values.map((mode) {
-                              return RadioListTile<ThemeMode>(
-                                title: Text(mode.name.capitalize()),
-                                value: mode,
-                                groupValue: currentThemeMode,
-                                onChanged: (newMode) {
-                                  if (newMode != null) {
-                                    context.read<ThemeCubit>().setThemeMode(
-                                      newMode,
-                                    );
-                                  }
-                                },
-                              );
-                            }).toList(),
-                      );
-                    },
                   ),
                 ],
               ),

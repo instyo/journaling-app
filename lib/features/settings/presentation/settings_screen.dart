@@ -9,6 +9,7 @@ import 'package:journaling/core/theme/theme_cubit.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/auth/presentation/login_screen.dart';
 import 'package:journaling/features/settings/presentation/ai_configuration_screen.dart';
+import 'package:journaling/features/user/presentation/user_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../cubit/settings_cubit.dart';
 
@@ -41,6 +42,15 @@ class SettingsScreen extends StatelessWidget {
           final cubit = context.read<SettingsCubit>();
           return Column(
             children: [
+              ListTile(
+                title: Text('User Profile'),
+                onTap: () {
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (context) => UserScreen()));
+                },
+                trailing: Icon(Icons.chevron_right, size: 28),
+              ),
               BlocBuilder<ThemeCubit, ThemeMode>(
                 builder: (context, state) {
                   return SwitchListTile(
