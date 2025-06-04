@@ -1,4 +1,4 @@
-package com.example.journaling
+package com.ikhwan.moodjournalapp
 
 import io.flutter.embedding.android.FlutterActivity
 

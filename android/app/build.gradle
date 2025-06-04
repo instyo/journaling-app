@@ -7,7 +7,7 @@ plugins {
 
 android {
     ndkVersion = "27.0.12077973"
-    namespace = "com.example.journaling"
+    namespace = "com.ikhwan.moodjournalapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.journaling"
+        applicationId "com.ikhwan.moodjournalapp"
         minSdkVersion 23
         targetSdkVersion 34
         versionCode flutter.versionCode

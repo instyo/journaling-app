@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepository {
@@ -21,6 +22,24 @@ class AuthRepository {
       idToken: googleAuth.idToken,
     );
     return await _firebaseAuth.signInWithCredential(credential);
+  }
+
+  Future<UserCredential> signInWithFacebook() async {
+    final LoginResult result = await FacebookAuth.instance.login();
+    if (result.status == LoginStatus.success) {
+      // Trigger the sign-in flow
+      final LoginResult loginResult = await FacebookAuth.instance.login();
+
+      // Create a credential from the access token
+      final OAuthCredential facebookAuthCredential =
+          FacebookAuthProvider.credential(
+            loginResult.accessToken?.tokenString ?? '',
+          );
+
+      return await _firebaseAuth.signInWithCredential(facebookAuthCredential);
+    } else {
+      throw Exception('Facebook sign in aborted: ${result.status}');
+    }
   }
 
   Future<UserCredential> signInWithGoogleWeb() async {
