@@ -9,7 +9,6 @@ import 'package:journaling/common/widgets/stripped_calendar.dart';
 import 'package:journaling/core/utils/context_extension.dart';
 import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/core/utils/state_status_enum.dart';
-import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/journal/cubit/journal_cubit.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
 import 'package:journaling/features/journal/models/journal_entry.dart';
@@ -21,7 +20,6 @@ class JournalListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScaffold(
       title: 'My Journals',
-      actions: _buildActions(context),
       body: BlocListener<JournalCubit, JournalState>(
         listener: (BuildContext context, JournalState state) {
           if (state.status == StateStatus.error) {
@@ -35,22 +33,14 @@ class JournalListScreen extends StatelessWidget {
         },
         child: _buildJournalContent(context),
       ),
-    );
-  }
-
-  List<Widget> _buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.add),
+      fab: FloatingActionButton(
+        elevation: 0,
         onPressed: () {
           FeelingSelectionScreen.open(context);
         },
+        child: const Icon(Icons.add),
       ),
-      IconButton(
-        icon: const Icon(Icons.logout),
-        onPressed: () => context.read<AuthCubit>().signOut(),
-      ),
-    ];
+    );
   }
 
   Widget _buildJournalContent(BuildContext context) {
@@ -74,21 +64,6 @@ class JournalListScreen extends StatelessWidget {
               final journals = snapshot.data!;
               final sortedData = [...journals]
                 ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-              // Only take data per hours
-              // final filteredData =
-              //     sortedData.where((entry) {
-              //       final entryTime = entry.createdAt;
-              //       return sortedData.any((otherEntry) {
-              //             final otherTime = otherEntry.createdAt;
-              //             return otherTime.isAfter(entryTime) &&
-              //                 otherTime.isBefore(
-              //                   entryTime.add(Duration(hours: 1)),
-              //                 );
-              //           }) ||
-              //           entryTime.minute == 0; // Keep the hour marks
-              //     }).toList();
-
-              // for (final so in sortedData) print(">> POI ${so.toMap()}");
 
               final empty = SizedBox.expand(
                 child: Center(
@@ -181,10 +156,7 @@ class JournalListScreen extends StatelessWidget {
                                             .map((e) => (e.createdAt, e.mood))
                                             .toList(),
                                     lineColor: context.primaryColor,
-                                    pointColor:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.tertiaryContainer,
+                                    pointColor: Color(0xff9e5656),
                                     formatTooltipLabel: (data) {
                                       return DateFormat.Hm().format(data.$1);
                                     },

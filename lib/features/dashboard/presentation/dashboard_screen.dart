@@ -32,6 +32,7 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               TabBar(
+                dividerColor: Colors.transparent,
                 tabs: [
                   Tab(icon: Icon(Icons.home)),
                   Tab(icon: Icon(Icons.stacked_bar_chart)),

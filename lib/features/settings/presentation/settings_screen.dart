@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:journaling/core/theme/theme_cubit.dart';
+import 'package:journaling/features/auth/cubit/auth_cubit.dart';
+import 'package:journaling/features/auth/presentation/login_screen.dart';
 import 'package:journaling/features/settings/presentation/ai_configuration_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../cubit/settings_cubit.dart';
@@ -149,6 +151,41 @@ class SettingsScreen extends StatelessWidget {
                     await prefs.remove('api_url');
                     await prefs.remove('api_token');
                     await prefs.remove('model');
+                  }
+                },
+              ),
+              ListTile(
+                title: Text("Sign Out"),
+                trailing: Icon(Icons.login),
+                iconColor: Colors.red,
+                textColor: Colors.red,
+                onTap: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text("Confirm Sign Out"),
+                        content: Text("Are you sure you want to sign out?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text("Cancel"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text("Sign Out"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (confirm == true) {
+                    context.read<AuthCubit>().signOut();
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                      (route) => false,
+                    );
                   }
                 },
               ),

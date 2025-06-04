@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -31,12 +32,13 @@ class _StatsScreenState extends State<StatsScreen> {
     return CustomScaffold(
       title: "Statistics",
       actions: [
-        IconButton(
-          onPressed: () {
-            cubit.createDummy(context.userId);
-          },
-          icon: Icon(Icons.dangerous),
-        ),
+        if (kDebugMode)
+          TextButton(
+            onPressed: () {
+              cubit.createDummy(context.userId);
+            },
+            child: Text("Add dummy data"),
+          ),
       ],
       body: SizedBox.expand(
         child: SingleChildScrollView(
@@ -97,7 +99,7 @@ class _StatsScreenState extends State<StatsScreen> {
                     return CustomLineGraph(
                       data: snapshot.data!,
                       lineColor: context.primaryColor,
-                      pointColor: Theme.of(context).colorScheme.tertiaryContainer,
+                      pointColor: Color(0xff9e5656),
                       formatTooltipLabel: (data) {
                         return DateFormat('dd/MM/yyyy').format(data.$1);
                       },
@@ -185,14 +187,16 @@ class _StatsScreenState extends State<StatsScreen> {
                         PieChart(
                           dataMap: data,
                           colorList: [
-                            Color(0xff5C7285),
-                            Color(0xff818C78),
-                            Color(0xffA7B49E),
-                            Color(0xffE2E0C8),
-                            Color(0xffC96868),
-                            Color(0xff295F98),
-                            Color(0xffFF8A8A),
-                            Color(0xffEF9C66),
+                            Color(0xfffa8246),
+                            Color(0xffd96552),
+                            Color(0xffc26d85),
+                            Color(0xffaa7a9b),
+                            Color(0xff8b668f),
+                            Color(0xfff6f6b3),
+                            Color(0xff9e5656),
+                            Color(0xffc7ad5b),
+                            Color(0xff356f79),
+                            Color(0xff16363c),
                           ],
                           formatChartValues: (val) {
                             return '${val.toInt()}';

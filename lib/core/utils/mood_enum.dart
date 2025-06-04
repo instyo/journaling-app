@@ -16,8 +16,11 @@ enum MoodEnum {
 
 extension MoodEnumX on MoodEnum {
   List<String> get feelings {
-    final result = rawFeelings.firstWhere((e) => e['value'] == value);
-    return result['feelings'];
+    final result = rawFeelings.firstWhere(
+      (e) => e['value'] == value,
+      orElse: () => {'feelings': []}, // Provide a default value if not found
+    );
+    return List<String>.from(result['feelings']); // Ensure the return type is List<String>
   }
   
   String get moodLabel => '$emoji ($label)';
