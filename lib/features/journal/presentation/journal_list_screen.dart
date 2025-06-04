@@ -92,7 +92,67 @@ class JournalListScreen extends StatelessWidget {
 
               final empty = SizedBox.expand(
                 child: Center(
-                  child: Text('No journals yet. Write your first one!'),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Add a subtle animated bounce effect to the icon
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 10),
+                        duration: Duration(seconds: 1),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, -value),
+                            child: child,
+                          );
+                        },
+                        child: Icon(
+                          Icons.edit,
+                          size: 70,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Use a vibrant headline style
+                      Text(
+                        'No journals yet.',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onBackground,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Make the call-to-action stand out
+                      Text(
+                        'Start your first journal!',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onBackground.withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Add a vibrant button encouraging user action
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          FeelingSelectionScreen.open(context);
+                        },
+                        icon: Icon(Icons.add),
+                        label: Text('Create Journal'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          textStyle: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
 
