@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
+import 'package:journaling/features/auth/presentation/email_login_screen.dart';
 import 'package:journaling/features/auth/presentation/signup_screen.dart';
 import 'package:journaling/features/feeling/presentation/feeling_selection_screen.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
@@ -87,12 +88,9 @@ class LoginScreen extends StatelessWidget {
               // For simplicity, let's add a button to navigate to email/password login/signup.
               ElevatedButton(
                 onPressed: () {
-                  // You might want a dedicated Email/Password Login Screen
-                  // for now, let's make it a simple text button below signup link.
-                  // For MVP, if user chooses email login, they navigate to a screen
-                  // with both login and signup options. For truly distinct screens,
-                  // you'd add email/password fields directly into this login screen.
-                  // For now, let's just make the "Don't have an account" clear.
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const EmailLoginScreen()),
+                  );
                 },
                 child: const Text(
                   'Login with Email',

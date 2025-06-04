@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
-import 'package:journaling/features/journal/presentation/journal_list_screen.dart';
+import 'package:journaling/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -45,8 +45,9 @@ class _SignupScreenState extends State<SignupScreen> {
               state.user.email ?? '',
               state.user.displayName ?? 'New User',
             );
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const JournalListScreen()),
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+              (route) => false,
             );
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
