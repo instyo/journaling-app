@@ -48,16 +48,12 @@ class FeelingSelectionScreen extends StatelessWidget {
                     const SizedBox(height: 24.0),
                     Text(
                       'How are you feeling today?',
-                      style: context.textTheme.headlineSmall?.copyWith(
-                        color: context.subtextColor,
-                      ),
+                      style: context.textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8.0),
                     Text(
                       'Which emoji describes how you are feeling now?',
-                      style: context.textTheme.bodyLarge?.copyWith(
-                        color: context.subtextColor,
-                      ),
+                      style: context.textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 20.0),
                     Row(
@@ -74,15 +70,15 @@ class FeelingSelectionScreen extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color:
                                       isSelected
-                                          ? Colors.white
-                                          : Colors.grey[100],
+                                          ? context.backgroundColor
+                                          : context.cardColor,
                                   borderRadius: BorderRadius.circular(12.0),
                                   border: Border.all(
                                     color:
                                         isSelected
                                             ? context.primaryColor
-                                            : Colors.grey[200]!,
-                                    width: isSelected ? 2.0 : 1.0,
+                                            : context.cardColor,
+                                    width: 2,
                                   ),
                                 ),
                                 child: Column(
@@ -98,8 +94,8 @@ class FeelingSelectionScreen extends StatelessWidget {
                                           ?.copyWith(
                                             color:
                                                 isSelected
-                                                    ? const Color(0xFF4C873D)
-                                                    : Colors.grey[700],
+                                                    ? context.primaryColor
+                                                    : null,
                                             fontWeight:
                                                 isSelected
                                                     ? FontWeight.bold
@@ -143,23 +139,23 @@ class FeelingSelectionScreen extends StatelessWidget {
                                   color:
                                       isSelected
                                           ? Colors.transparent
-                                          : const Color(0xFFF0F5ED),
+                                          : context.primaryColor.withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(20.0),
-                                  border: Border.all(
-                                    color:
-                                        isSelected
-                                            ? const Color(0xFF4C873D)
-                                            : const Color(0xFFF0F5ED),
-                                    width: 1.5,
-                                  ),
+                                  border:
+                                      !isSelected
+                                          ? null
+                                          : Border.all(
+                                            color: context.primaryColor,
+                                            width: 1.5,
+                                          ),
                                 ),
                                 child: Text(
                                   feeling,
                                   style: context.textTheme.bodyLarge?.copyWith(
                                     color:
-                                        isSelected
-                                            ? const Color(0xFF4C873D)
-                                            : Colors.grey[700],
+                                        !isSelected
+                                            ? null
+                                            : context.primaryColor,
                                     fontWeight:
                                         isSelected
                                             ? FontWeight.bold

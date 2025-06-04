@@ -137,8 +137,9 @@ class JournalWriteScreenV2 extends StatelessWidget {
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           shape: StadiumBorder(),
-                          foregroundColor: Theme.of(context).primaryColor,
-                          backgroundColor: const Color(0xFFF0F5ED),
+                          foregroundColor: context.primaryColor,
+                          // backgroundColor: context.primaryColor.withOpacity(0.25),
+                          // shadowColor: Colors.transparent,
                         ),
                         onPressed: () async {
                           final title = titleController.text;

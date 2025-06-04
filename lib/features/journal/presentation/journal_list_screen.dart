@@ -101,41 +101,45 @@ class JournalListScreen extends StatelessWidget {
                 child:
                     journals.isEmpty
                         ? empty
-                        : SingleChildScrollView(
-                          physics: ClampingScrollPhysics(),
-
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              _buildSummarySection(
-                                context,
-                                _calculateMostCommonMood(journals),
-                                journals.length,
-                              ),
-                              const SizedBox(height: 32),
-
-                              if (sortedData.length > 1)
-                                CustomLineGraph(
-                                  data:
-                                      sortedData
-                                          .map((e) => (e.createdAt, e.mood))
-                                          .toList(),
-                                  lineColor: context.primaryColor,
-                                  pointColor: Colors.orange,
-                                  formatTooltipLabel: (data) {
-                                    return DateFormat.Hm().format(data.$1);
-                                  },
-                                  formatPointLabel: (data) {
-                                    return "";
-                                  },
-                                  formatYLabel: (data) {
-                                    return data.label;
-                                  },
+                        : SizedBox.expand(
+                          child: SingleChildScrollView(
+                            physics: ClampingScrollPhysics(),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                _buildSummarySection(
+                                  context,
+                                  _calculateMostCommonMood(journals),
+                                  journals.length,
                                 ),
+                                const SizedBox(height: 32),
 
-                              const SizedBox(height: 8),
-                              _buildJournalList(context, journals),
-                            ],
+                                if (sortedData.length > 1)
+                                  CustomLineGraph(
+                                    data:
+                                        sortedData
+                                            .map((e) => (e.createdAt, e.mood))
+                                            .toList(),
+                                    lineColor: context.primaryColor,
+                                    pointColor:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.tertiaryContainer,
+                                    formatTooltipLabel: (data) {
+                                      return DateFormat.Hm().format(data.$1);
+                                    },
+                                    formatPointLabel: (data) {
+                                      return "";
+                                    },
+                                    formatYLabel: (data) {
+                                      return data.label;
+                                    },
+                                  ),
+
+                                const SizedBox(height: 8),
+                                _buildJournalList(context, journals),
+                              ],
+                            ),
                           ),
                         ),
               );

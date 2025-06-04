@@ -54,80 +54,8 @@ class MyApp extends StatelessWidget {
             return MaterialApp(
               title: 'Mood Journal',
               debugShowCheckedModeBanner: false,
-              theme: FlexThemeData.light(scheme: FlexScheme.greenM3),
-              darkTheme: FlexThemeData.dark(scheme: FlexScheme.greenM3),
-              // theme: AppThemes.lightTheme.copyWith(
-              //   textTheme: GoogleFonts.poppinsTextTheme(textTheme).copyWith(
-              //     bodyLarge: textTheme.bodyLarge?.copyWith(color: Colors.black),
-              //     bodyMedium: textTheme.bodyMedium?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     bodySmall: textTheme.bodySmall?.copyWith(color: Colors.black),
-              //     headlineLarge: textTheme.headlineLarge?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     headlineMedium: textTheme.headlineMedium?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     headlineSmall: textTheme.headlineSmall?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     titleLarge: textTheme.titleLarge?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     titleMedium: textTheme.titleMedium?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     titleSmall: textTheme.titleSmall?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     labelLarge: textTheme.labelLarge?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     labelMedium: textTheme.labelMedium?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //     labelSmall: textTheme.labelSmall?.copyWith(
-              //       color: Colors.black,
-              //     ),
-              //   ),
-              // ),
-              // darkTheme: AppThemes.darkTheme.copyWith(
-              //   textTheme: GoogleFonts.poppinsTextTheme(textTheme).copyWith(
-              //     bodyLarge: textTheme.bodyLarge?.copyWith(color: Colors.white),
-              //     bodyMedium: textTheme.bodyMedium?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     bodySmall: textTheme.bodySmall?.copyWith(color: Colors.white),
-              //     headlineLarge: textTheme.headlineLarge?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     headlineMedium: textTheme.headlineMedium?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     headlineSmall: textTheme.headlineSmall?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     titleLarge: textTheme.titleLarge?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     titleMedium: textTheme.titleMedium?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     titleSmall: textTheme.titleSmall?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     labelLarge: textTheme.labelLarge?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     labelMedium: textTheme.labelMedium?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //     labelSmall: textTheme.labelSmall?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //   ),
-              // ),
+              theme: FlexThemeData.light(scheme: FlexScheme.damask),
+              darkTheme: FlexThemeData.dark(scheme: FlexScheme.damask),
               themeMode: themeMode,
               home: BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, authState) {

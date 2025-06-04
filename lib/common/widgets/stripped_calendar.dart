@@ -90,18 +90,31 @@ class _CalendarStripState extends State<CalendarStrip>
               margin: EdgeInsets.symmetric(horizontal: 4),
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isSelected ? context.cardColor : context.white,
+                color:
+                    isSelected ? Theme.of(context).primaryColor : context.white,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(dayName, style: context.textTheme.bodySmall),
+                  Text(
+                    dayName,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color:
+                          isSelected
+                              ? Theme.of(context).secondaryHeaderColor
+                              : null,
+                    ),
+                  ),
                   SizedBox(height: 4),
                   Text(
                     '${date.day}',
                     style: context.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
+                      color:
+                          isSelected
+                              ? Theme.of(context).secondaryHeaderColor
+                              : null,
                     ),
                   ),
                 ],

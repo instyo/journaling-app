@@ -19,7 +19,7 @@ class CustomChip extends StatelessWidget {
       margin: EdgeInsets.only(right: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F5ED),
+        color: context.primaryColor.withOpacity(0.25),
         borderRadius: BorderRadius.circular(20.0), // Pill shape for chips
         border: Border.all(
           color: isSelected ? context.primaryColor : Colors.grey.shade700,

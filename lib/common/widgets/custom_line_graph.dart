@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:journaling/core/utils/context_extension.dart';
 import 'dart:ui' as ui;
 import 'package:journaling/core/utils/mood_enum.dart';
 
@@ -70,6 +71,7 @@ class _CustomLineGraphState extends State<CustomLineGraph> {
                 widget.data,
                 widget.lineColor,
                 widget.pointColor,
+                Theme.of(context).dividerColor,
                 widget.formatYLabel,
                 widget.formatXLabel,
                 widget.formatPointLabel,
@@ -108,12 +110,12 @@ class _TooltipBubble extends StatelessWidget {
     return Material(
       elevation: 3,
       borderRadius: BorderRadius.circular(6),
-      color: Colors.white,
+      color: context.cardColor,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 12, color: Colors.black),
+          style: context.textTheme.bodySmall,
         ),
       ),
     );
@@ -124,6 +126,7 @@ class _LineGraphPainter extends CustomPainter {
   final List<GraphData> data;
   final Color lineColor;
   final Color pointColor;
+  final Color gridColor;
   final String Function(MoodEnum value)? formatYLabel;
   final String Function(DateTime time)? formatXLabel;
   final String Function(GraphData value)? formatPointLabel;
@@ -133,6 +136,7 @@ class _LineGraphPainter extends CustomPainter {
     this.data,
     this.lineColor,
     this.pointColor,
+    this.gridColor,
     this.formatYLabel,
     this.formatXLabel,
     this.formatPointLabel,
@@ -202,7 +206,7 @@ class _LineGraphPainter extends CustomPainter {
     // Draw grid lines
     final gridPaint =
         Paint()
-          ..color = Colors.grey.shade300
+          ..color = gridColor
           ..strokeWidth = 1;
 
     const gridLines = 5;
@@ -218,7 +222,7 @@ class _LineGraphPainter extends CustomPainter {
     }
 
     // Draw Y axis labels
-    final textStyle = const TextStyle(fontSize: 12, color: Colors.black);
+    final textStyle = const TextStyle(fontSize: 12, color: Colors.grey);
     for (final rating in ratingScale) {
       final yValue = rating.value.toDouble();
       final y =

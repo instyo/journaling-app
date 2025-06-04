@@ -5,6 +5,7 @@ import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:journaling/core/theme/theme_cubit.dart';
 import 'package:journaling/features/settings/presentation/ai_configuration_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../cubit/settings_cubit.dart';
@@ -38,17 +39,23 @@ class SettingsScreen extends StatelessWidget {
           final cubit = context.read<SettingsCubit>();
           return Column(
             children: [
-              SwitchListTile(
-                title: Text('Dark Theme'),
-                value: state.isDarkTheme,
-                onChanged: (value) {
-                  context.read<SettingsCubit>().toggleTheme();
+              BlocBuilder<ThemeCubit, ThemeMode>(
+                builder: (context, state) {
+                  return SwitchListTile(
+                    title: Text('Dark Theme'),
+                    value: state == ThemeMode.dark,
+                    onChanged: (value) {
+                      context.read<ThemeCubit>().setThemeMode(
+                        value ? ThemeMode.dark : ThemeMode.light,
+                      );
+                    },
+                  );
                 },
               ),
               ScheduleNotificationTile(
                 title: 'Hourly Reminder',
                 value:
-                    'Every hour at ${formatDurationHM(state.hourlyDuration ?? Duration.zero)}',
+                    'Notified every ${formatDurationHM(state.hourlyDuration ?? Duration.zero)}',
                 enabled: state.hourly,
                 onChanged: (val) async {
                   if (state.hourly) {

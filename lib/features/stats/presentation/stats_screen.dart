@@ -97,7 +97,7 @@ class _StatsScreenState extends State<StatsScreen> {
                     return CustomLineGraph(
                       data: snapshot.data!,
                       lineColor: context.primaryColor,
-                      pointColor: Colors.orange,
+                      pointColor: Theme.of(context).colorScheme.tertiaryContainer,
                       formatTooltipLabel: (data) {
                         return DateFormat('dd/MM/yyyy').format(data.$1);
                       },
@@ -184,6 +184,16 @@ class _StatsScreenState extends State<StatsScreen> {
                       else
                         PieChart(
                           dataMap: data,
+                          colorList: [
+                            Color(0xff5C7285),
+                            Color(0xff818C78),
+                            Color(0xffA7B49E),
+                            Color(0xffE2E0C8),
+                            Color(0xffC96868),
+                            Color(0xff295F98),
+                            Color(0xffFF8A8A),
+                            Color(0xffEF9C66),
+                          ],
                           formatChartValues: (val) {
                             return '${val.toInt()}';
                           },

@@ -9,8 +9,8 @@ extension BuildContextX on BuildContext {
 
   Color get cardColor =>
       Theme.of(this).brightness == Brightness.dark
-          ? Color(0xff2a2a2a)
-          : Color(0xFFF0F5ED);
+          ? Theme.of(this).cardColor
+          : primaryColor.withOpacity(0.15);
 
   Color get cardColor2 =>
       Theme.of(this).brightness == Brightness.dark
