@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:journaling/core/utils/env.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 
 extension BuildContextX on BuildContext {
@@ -30,7 +31,9 @@ extension BuildContextX on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
 
   String get userId =>
-      read<AuthCubit>().state is Authenticated
+      Env.kLocalDb
+          ? ''
+          : read<AuthCubit>().state is Authenticated
           ? (read<AuthCubit>().state as Authenticated).user.uid
           : 'unknown'; // Fallback, should not happen if auth is handled
 }

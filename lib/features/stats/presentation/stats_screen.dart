@@ -32,13 +32,13 @@ class _StatsScreenState extends State<StatsScreen> {
     return CustomScaffold(
       title: "Statistics",
       actions: [
-        if (kDebugMode)
-          TextButton(
-            onPressed: () {
-              cubit.createDummy(context.userId);
-            },
-            child: Text("Add dummy data"),
-          ),
+        // if (kDebugMode)
+        //   TextButton(
+        //     onPressed: () {
+        //       cubit.createDummy(context.userId);
+        //     },
+        //     child: Text("Add dummy data"),
+        //   ),
       ],
       body: SizedBox.expand(
         child: SingleChildScrollView(

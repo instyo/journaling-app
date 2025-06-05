@@ -55,6 +55,8 @@ class JournalWriteScreenV2 extends StatelessWidget {
       body: BlocBuilder<JournalCubit, JournalState>(
         bloc: cubit..loadPreferences(),
         builder: (context, state) {
+          print(">> Cubit : ${cubit.state.status}");
+
           final bool isLoading = state.status == StateStatus.loading;
 
           return Stack(
@@ -142,32 +144,33 @@ class JournalWriteScreenV2 extends StatelessWidget {
                           // shadowColor: Colors.transparent,
                         ),
                         onPressed: () async {
-                          final title = titleController.text;
+                          try {
+                            final title = titleController.text;
 
-                          if (isEdit) {
-                            final journal = entry?.copyWith(
-                              title: title,
-                              content: textController.text,
-                            );
+                            if (isEdit) {
+                              final journal = entry?.copyWith(
+                                title: title,
+                                content: textController.text,
+                              );
 
-                            await cubit.updateJournal(journal!);
-                          } else {
-                            final journal = JournalEntry(
-                              userId: context.userId,
-                              title: title,
-                              content: textController.text,
-                              createdAt: DateTime.now(),
-                              feelings: feelings,
-                              mood: item,
-                            );
+                              await cubit.updateJournal(journal!);
+                            } else {
+                              final journal = JournalEntry(
+                                userId: context.userId,
+                                title: title,
+                                content: textController.text,
+                                createdAt: DateTime.now(),
+                                feelings: feelings,
+                                mood: item,
+                              );
 
-                            await cubit.createJournal(journal);
+                              await cubit.createJournal(journal);
+                            }
+
+                            DashboardScreen.open(context);
+                          } catch (e, s) {
+                            print(">> $e, $s");
                           }
-
-                          // Refresh and navigate
-                          final journalCubit = context.read<JournalCubit>();
-                          journalCubit.changeDate(DateTime.now());
-                          DashboardScreen.open(context);
                         },
                         label: Text("Submit"),
                         icon: Icon(Icons.send),

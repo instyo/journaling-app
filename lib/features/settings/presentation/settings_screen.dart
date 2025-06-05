@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:journaling/core/theme/theme_cubit.dart';
+import 'package:journaling/core/utils/env.dart';
 import 'package:journaling/features/auth/cubit/auth_cubit.dart';
 import 'package:journaling/features/auth/presentation/login_screen.dart';
 import 'package:journaling/features/settings/presentation/ai_configuration_screen.dart';
@@ -42,15 +43,16 @@ class SettingsScreen extends StatelessWidget {
           final cubit = context.read<SettingsCubit>();
           return Column(
             children: [
-              ListTile(
-                title: Text('User Profile'),
-                onTap: () {
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (context) => UserScreen()));
-                },
-                trailing: Icon(Icons.chevron_right, size: 28),
-              ),
+              if (!Env.kLocalDb)
+                ListTile(
+                  title: Text('User Profile'),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => UserScreen()),
+                    );
+                  },
+                  trailing: Icon(Icons.chevron_right, size: 28),
+                ),
               BlocBuilder<ThemeCubit, ThemeMode>(
                 builder: (context, state) {
                   return SwitchListTile(
@@ -164,41 +166,42 @@ class SettingsScreen extends StatelessWidget {
                   }
                 },
               ),
-              ListTile(
-                title: Text("Sign Out"),
-                trailing: Icon(Icons.login),
-                iconColor: Colors.red,
-                textColor: Colors.red,
-                onTap: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text("Confirm Sign Out"),
-                        content: Text("Are you sure you want to sign out?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: Text("Cancel"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: Text("Sign Out"),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-
-                  if (confirm == true) {
-                    context.read<AuthCubit>().signOut();
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                      (route) => false,
+              if (!Env.kLocalDb)
+                ListTile(
+                  title: Text("Sign Out"),
+                  trailing: Icon(Icons.login),
+                  iconColor: Colors.red,
+                  textColor: Colors.red,
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text("Confirm Sign Out"),
+                          content: Text("Are you sure you want to sign out?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text("Sign Out"),
+                            ),
+                          ],
+                        );
+                      },
                     );
-                  }
-                },
-              ),
+
+                    if (confirm == true) {
+                      context.read<AuthCubit>().signOut();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (route) => false,
+                      );
+                    }
+                  },
+                ),
             ],
           );
         },

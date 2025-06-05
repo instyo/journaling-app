@@ -20,14 +20,17 @@ class CustomScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title), actions: actions),
-      body: SizedBox.expand(
-        child: Container(margin: EdgeInsets.all(8), child: body),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        appBar: AppBar(title: Text(title), actions: actions),
+        body: SizedBox.expand(
+          child: Container(margin: EdgeInsets.all(8), child: body),
+        ),
+        floatingActionButton: fab,
+        floatingActionButtonLocation: fabLocation,
+        floatingActionButtonAnimator: fabAnimator,
       ),
-      floatingActionButton: fab,
-      floatingActionButtonLocation: fabLocation,
-      floatingActionButtonAnimator: fabAnimator,
     );
   }
 }

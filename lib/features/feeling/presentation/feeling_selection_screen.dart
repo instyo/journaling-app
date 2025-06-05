@@ -1,6 +1,7 @@
 // lib/feeleing.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:journaling/common/widgets/custom_scaffold.dart';
 import 'package:journaling/core/utils/context_extension.dart';
 import 'package:journaling/core/utils/mood_enum.dart';
 import 'package:journaling/features/dashboard/presentation/dashboard_screen.dart';
@@ -22,21 +23,19 @@ class FeelingSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => FeelingCubit(),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          actions: [
-            IconButton(
-              icon: Icon(Icons.close, color: context.primaryColor),
-              onPressed: () {
-                final jCubit = context.read<JournalCubit>();
+      child: CustomScaffold(
+        title: "Feeling Selection",
+        actions: [
+          IconButton(
+            icon: Icon(Icons.close, color: context.primaryColor),
+            onPressed: () {
+              final jCubit = context.read<JournalCubit>();
 
-                jCubit.changeDate(DateTime.now());
-                DashboardScreen.open(context);
-              },
-            ),
-          ],
-        ),
+              jCubit.changeDate(DateTime.now());
+              DashboardScreen.open(context);
+            },
+          ),
+        ],
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -47,12 +46,12 @@ class FeelingSelectionScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 24.0),
                     Text(
-                      'How are you feeling today?',
+                      'What’s on your mind today?',
                       style: context.textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8.0),
                     Text(
-                      'Which emoji describes how you are feeling now?',
+                      'Pick an emoji that reflects your current mood',
                       style: context.textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 20.0),
@@ -110,7 +109,7 @@ class FeelingSelectionScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32.0),
                     Text(
-                      'Which emotions describe\nyour feelings?',
+                      'Which feelings are present for you?',
                       style: context.textTheme.headlineSmall?.copyWith(
                         color: context.subtextColor,
                       ),
@@ -139,7 +138,9 @@ class FeelingSelectionScreen extends StatelessWidget {
                                   color:
                                       isSelected
                                           ? Colors.transparent
-                                          : context.primaryColor.withOpacity(0.15),
+                                          : context.primaryColor.withOpacity(
+                                            0.15,
+                                          ),
                                   borderRadius: BorderRadius.circular(20.0),
                                   border:
                                       !isSelected

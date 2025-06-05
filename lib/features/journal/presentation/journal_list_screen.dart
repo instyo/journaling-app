@@ -21,6 +21,7 @@ class JournalListScreen extends StatelessWidget {
     return CustomScaffold(
       title: 'My Journals',
       body: BlocListener<JournalCubit, JournalState>(
+        bloc: context.read<JournalCubit>()..changeDate(DateTime.now()),
         listener: (BuildContext context, JournalState state) {
           if (state.status == StateStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -242,7 +243,7 @@ class JournalListScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        for (final journal in journals) _buildJournalItem(context, journal),
+        for (final journal in journals.reversed) _buildJournalItem(context, journal),
       ],
     );
   }

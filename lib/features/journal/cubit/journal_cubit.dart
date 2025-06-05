@@ -4,6 +4,7 @@ import 'package:journaling/core/utils/state_status_enum.dart';
 import 'package:journaling/features/journal/data/open_ai_service.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../data/journal_repository.dart';
 import '../models/journal_entry.dart';
 
@@ -45,6 +46,7 @@ class JournalCubit extends Cubit<JournalState> {
         .getJournalsByDate(date)
         .listen(
           (journals) {
+            print(">> journals: ${journals.length}");
             emit(
               state.copyWith(journals: journals, status: StateStatus.success),
             );
@@ -71,8 +73,12 @@ class JournalCubit extends Cubit<JournalState> {
           !useAI
               ? newEntry.title
               : await OpenAiService().getTitle(newEntry.content);
-
-      await _journalRepository.addJournal(newEntry.copyWith(title: title));
+      
+      print(">> Add jurnal with title: $title");
+      
+      await _journalRepository.addJournal(
+        newEntry.copyWith(id: Uuid().v4(), title: title),
+      );
       // State will update automatically due to listening to stream
     } catch (e) {
       emit(

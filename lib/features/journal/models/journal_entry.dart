@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:journaling/core/utils/env.dart';
 import 'package:journaling/core/utils/mood_enum.dart';
 
 class JournalEntry {
@@ -22,7 +23,7 @@ class JournalEntry {
 
   factory JournalEntry.fromMap(Map<String, dynamic> map, String id) {
     return JournalEntry(
-      id: id,
+      id: map['id'] ?? '',
       userId: map['userId'] ?? '',
       title: map['title'] ?? '',
       content: map['content'] ?? '',
@@ -37,18 +38,19 @@ class JournalEntry {
       createdAt:
           map['createdAt'] == null
               ? DateTime.now()
-              : (map['createdAt'] as Timestamp).toDate(),
+              : Env.kLocalDb ? DateTime.parse(map['createdAt']) : (map['createdAt'] as Timestamp).toDate(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'userId': userId,
       'title': title,
       'content': content,
       'mood': mood.value,
       'feelings': feelings,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'createdAt': Env.kLocalDb ? createdAt.toIso8601String() : Timestamp.fromDate(createdAt),
     };
   }
 

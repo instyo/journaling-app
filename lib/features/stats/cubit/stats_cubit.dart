@@ -116,6 +116,7 @@ class StatsCubit extends Cubit<StatsState> {
         .getJournalsInBetweenDates(today.subtract(Duration(days: 7)), today)
         .listen(
           (journals) {
+            print(">> Journals Stats: ${journals.length}");
             emit(
               state.copyWith(journals: journals, status: StateStatus.success),
             );
