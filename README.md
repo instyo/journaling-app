@@ -6,7 +6,7 @@ Daily journal writing, built with 🐦 flutter & 🔥 firebase.
 
 1. Enable flutterfire CLI, follow the steps in this url : https://firebase.flutter.dev/docs/overview
 2. Run `flutterfire configure` and select your firebase project
-3. Run `flutter run` to debug
+3. Run `flutter run -t lib/main.firebase.dart` to debug with firebase, but if you want the data to be saved locally, you can use `fvm flutter run -t lib/main.local.dart`
 
 ## Features
 - 🔥 Firebase Auth with google_sign_in
@@ -21,5 +21,8 @@ Daily journal writing, built with 🐦 flutter & 🔥 firebase.
 
 
 ## To Do
-- [] Add local database
+- [x] Add local database
 - [] Clean up code
+
+
+Icon by Flaticon
