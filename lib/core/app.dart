@@ -12,7 +12,6 @@ import 'package:journaling/features/journal/data/journal_repository.dart';
 import 'package:journaling/features/journal/data/local_journal_repository.dart';
 import 'package:journaling/features/settings/cubit/settings_cubit.dart';
 import 'package:journaling/features/stats/cubit/stats_cubit.dart';
-import 'package:journaling/features/stats/data/local_stats_repository.dart';
 import 'package:journaling/features/user/cubit/user_cubit.dart';
 import 'package:journaling/features/user/data/user_repository.dart';
 import '../core/theme/theme_cubit.dart';
@@ -27,7 +26,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   List<dynamic> localProviders = [
     RepositoryProvider(create: (context) => LocalJournalRepository()),
-    RepositoryProvider(create: (context) => LocalStatsRepository()),
   ];
 
   List<dynamic> firebaseProviders = [
@@ -53,10 +51,10 @@ class _MyAppState extends State<MyApp> {
       create: (context) => AuthCubit(context.read<AuthRepository>()),
     ),
     BlocProvider(
-      create: (context) => JournalCubit(context.read<IJournalRepository>()),
+      create: (context) => JournalCubit(context.read<FirebaseJournalRepository>()),
     ),
     BlocProvider(
-      create: (context) => StatsCubit(context.read<IJournalRepository>()),
+      create: (context) => StatsCubit(context.read<FirebaseJournalRepository>()),
     ),
     BlocProvider(create: (context) => SettingsCubit()),
     BlocProvider(
